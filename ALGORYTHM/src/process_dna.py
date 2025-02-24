@@ -10,7 +10,7 @@ import pg8000
 from dotenv import load_dotenv
 import sqlalchemy
 import pandas as pd
-load_dotenv()
+# load_dotenv()
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -23,6 +23,9 @@ logging.basicConfig(
 )
 logger.setLevel(logging.DEBUG)
 
+logger.info(f"{os.environ['INSTANCE_CONNECTION_NAME']}, {os.environ['DB_USER']}, {os.environ['DB_PASS']}, {os.environ['DB_NAME']}")
+
+ 
 def read_dna_file(file_path):
     """
     Reads an AncestryDNA raw data .txt file and extracts SNP records.

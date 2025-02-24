@@ -25,35 +25,75 @@ logger.setLevel(logging.DEBUG)
 
 # logger.info(f"{os.environ['INSTANCE_CONNECTION_NAME']}, {os.environ['DB_USER']}, {os.environ['DB_PASS']}, {os.environ['DB_NAME']}")
 
- 
-def read_dna_file(file_path):
-    """
-    Reads an AncestryDNA raw data .txt file and extracts SNP records.
-    Skips header lines (#) and the column header.
-    Returns a list of dicts with keys: rsid, chromosome, position, allele1, allele2.
-    """
-    snps = []
-    with open(file_path, 'r') as file:
-        for line in file:
-            line = line.strip()
-            # Skip comments and empty lines
-            if line.startswith("#") or not line:
-                continue
-            # Skip the header row if present
-            if line.startswith("rsid"):
-                continue
+def verify_and_read_txt(filepath):
+    # Check if the file is a .txt file
+    # if not filepath.endswith('.txt'):
+    #     raise ValueError(f"The file {filepath} is not a .txt file")
 
-            fields = line.split("\t")
-            if len(fields) >= 5:
-                rsid, chromosome, position, allele1, allele2 = fields[:5]
-                snps.append({
-                    'rsid': rsid,
-                    'chromosome': chromosome,
-                    'position': position,
-                    'allele1': allele1,
-                    'allele2': allele2
-                })
-    return snps
+    # Check if the file exists
+    if not os.path.isfile(filepath):
+        raise FileNotFoundError("The file does not exist")
+
+    # Define possible sets of valid columns
+    valid_columns_set1 = ['rsid', 'chromosome', 'position', 'allele1', 'allele2']
+    valid_columns_set2 = ['rsid', 'chromosome', 'position', 'genotype']
+
+    # Read the first 100 lines of the file
+    with open(filepath, 'r') as file:
+        for i, line in enumerate(file):
+            if i >= 100:
+                break
+            # Check if all valid columns from set 1 are in the line
+            if all(column in line for column in valid_columns_set1):
+                return valid_columns_set1
+            # Check if all valid columns from set 2 are in the line
+            if all(column in line for column in valid_columns_set2):
+                return valid_columns_set2
+
+    return []
+
+def read_dna_file(filepath):
+    columns = verify_and_read_txt(filepath)
+    if not columns:
+        raise ValueError("The file does not contain the expected columns")
+
+    # Read the data into a DataFrame
+    df = pd.read_csv(filepath, sep='\t', comment='#', names=columns, dtype=str)
+
+    # If the file contains a genotype column, split it into allele1 and allele2
+    if 'genotype' in df.columns:
+        df[['allele1', 'allele2']] = df['genotype'].apply(lambda x: pd.Series(list(x)))
+        df.drop(columns=['genotype'], inplace=True)
+
+    return df.to_dict(orient='records')
+# def read_dna_file(file_path):
+#     """
+#     Reads an AncestryDNA raw data .txt file and extracts SNP records.
+#     Skips header lines (#) and the column header.
+#     Returns a list of dicts with keys: rsid, chromosome, position, allele1, allele2.
+#     """
+#     snps = []
+#     with open(file_path, 'r') as file:
+#         for line in file:
+#             line = line.strip()
+#             # Skip comments and empty lines
+#             if line.startswith("#") or not line:
+#                 continue
+#             # Skip the header row if present
+#             if line.startswith("rsid"):
+#                 continue
+
+#             fields = line.split("\t")
+#             if len(fields) >= 5:
+#                 rsid, chromosome, position, allele1, allele2 = fields[:5]
+#                 snps.append({
+#                     'rsid': rsid,
+#                     'chromosome': chromosome,
+#                     'position': position,
+#                     'allele1': allele1,
+#                     'allele2': allele2
+#                 })
+#     return snps
 
 def connect_to_database() -> sqlalchemy.engine.base.Engine:
     """

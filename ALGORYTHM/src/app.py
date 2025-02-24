@@ -11,8 +11,8 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from process_dna import read_dna_file, connect_to_database, assemble_report_data, generate_pdf
 import logging
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 # Configure logging
 logging.basicConfig(
@@ -53,7 +53,14 @@ app.layout = dbc.Container([
             },
             multiple=False
         ), width=6),
-        dbc.Col(html.Div(id='output-data-upload'), width=6)
+        dbc.Col(dcc.Loading(
+            id="loading-upload",
+            type="default",
+            children=html.Div(id='output-data-upload')
+        ), width=6)
+    ]),
+    dbc.Row([
+        dbc.Col(dbc.Checkbox(id='test-checkbox', label='Generate Dummy Report', className="mr-2"), width=12)
     ]),
     dbc.Row([
         dbc.Col(dbc.Button("Submit", id="submit-button", color="primary", className="mr-2"), width=12)
@@ -99,6 +106,7 @@ def dummy_generate_pdf(output_path):
     c.drawText(txt_obj)
 
     c.save()
+
 def parse_contents(contents, filename):
     logging.info(f"Parsing contents of file: {filename}")
     content_type, content_string = contents.split(',')
@@ -126,9 +134,6 @@ def parse_contents(contents, filename):
     State('upload-data', 'filename')
 )
 def update_output(contents, filename):
-    # logging.info(
-    #     f"{os.environ['INSTANCE_CONNECTION_NAME']}, {os.environ['DB_USER']}, {os.environ['DB_PASS']}, {os.environ['DB_NAME']}")
-
     if contents is not None:
         snps = parse_contents(contents, filename)
         if snps is not None:
@@ -143,7 +148,7 @@ def update_output(contents, filename):
                 html.H5(filename),
                 html.H6("There was an error processing the file.")
             ])
-    return ""
+    return html.Div()
 
 
 @app.callback(
@@ -152,32 +157,31 @@ def update_output(contents, filename):
     Output('download-link', 'style'),
     Input('submit-button', 'n_clicks'),
     State('upload-data', 'contents'),
-    State('upload-data', 'filename')
+    State('upload-data', 'filename'),
+    State('test-checkbox', 'value')
 )
-def generate_report(n_clicks, contents, filename):
+def generate_report(n_clicks, contents, filename, test_checkbox):
     if n_clicks is not None and contents is not None:
         logging.info("Submit button clicked.")
         snps = parse_contents(contents, filename)
         if snps is not None:
             output_pdf = os.path.join("reports", "genomic_report.pdf")
-            dummy_generate_pdf(output_pdf)
+            if test_checkbox:
+                dummy_generate_pdf(output_pdf)
+            else:
+                # Connect to the database and generate the report
+                logging.info("Connecting to the database.")
+                engine = connect_to_database()
+                with engine.connect() as conn:
+                    logging.info("Assembling report data.")
+                    report_data = assemble_report_data(conn, snps)
+                    logging.info(f"Output PDF path: {output_pdf}")
+                    logging.info("Generating PDF report.")
+                    generate_pdf(report_data, output_pdf, conn)
+                    logging.info("Report generated successfully.")
             return html.Div([
                 html.H6("Report generated successfully.")
             ]), f"/download/{os.path.basename(output_pdf)}", {"display": "block"}
-            # # Connect to the database and generate the report
-            # logging.info("Connecting to the database.")
-            # engine = connect_to_database()
-            # with engine.connect() as conn:
-            #     logging.info("Assembling report data.")
-            #     report_data = assemble_report_data(conn, snps)
-            #     output_pdf = os.path.join("reports", "genomic_report.pdf")
-            #     logging.info(f"Output PDF path: {output_pdf}")
-            #     logging.info("Generating PDF report.")
-            #     generate_pdf(report_data, output_pdf, conn)
-            #     logging.info("Report generated successfully.")
-                # return html.Div([
-                #     html.H6("Report generated successfully.")
-                # ]), f"/download/{os.path.basename(output_pdf)}", {"display": "block"}
         else:
             logging.error("Error processing the file for report generation.")
             return html.Div([

@@ -11,6 +11,9 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from process_dna import read_dna_file, connect_to_database, assemble_report_data, generate_pdf
 import logging
+from dotenv import load_dotenv
+load_dotenv()
+
 
 # Configure logging
 logging.basicConfig(
@@ -137,12 +140,13 @@ def generate_report(n_clicks, contents, filename):
                 logging.info("Assembling report data.")
                 report_data = assemble_report_data(conn, snps)
                 output_pdf = os.path.abspath("genomic_report.pdf")
+                logging.info(f"Output PDF path: {output_pdf}")
                 logging.info("Generating PDF report.")
                 generate_pdf(report_data, output_pdf, conn)
                 logging.info("Report generated successfully.")
                 return html.Div([
                     html.H6("Report generated successfully.")
-                ]), f"/download/{os.path.basename(output_pdf)}", {"display": "block"}
+                ]), f"/download/{output_pdf}", {"display": "block"}
         else:
             logging.error("Error processing the file for report generation.")
             return html.Div([
@@ -160,4 +164,4 @@ def download_file(filename):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+    app.run_server(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 8050)))

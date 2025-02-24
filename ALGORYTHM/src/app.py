@@ -14,7 +14,6 @@ import logging
 from dotenv import load_dotenv
 load_dotenv()
 
-
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -73,6 +72,33 @@ app.layout = dbc.Container([
 ])
 
 
+def dummy_generate_pdf(output_path):
+    """
+    Creates a dummy PDF with Lorem Ipsum text for testing purposes.
+    """
+    c = canvas.Canvas(output_path, pagesize=letter)
+    width, height = letter
+
+    c.setFont("Helvetica-Bold", 20)
+    c.drawString(50, height - 50, "Lorem Ipsum Report")
+    c.setFont("Helvetica", 12)
+    c.drawString(50, height - 75, "A dummy report for testing purposes")
+
+    lorem_ipsum_text = (
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
+        "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. "
+        "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. "
+        "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. "
+        "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+    )
+
+    c.setFont("Helvetica", 10)
+    txt_obj = c.beginText(50, height - 110)
+    for line in lorem_ipsum_text.split('. '):
+        txt_obj.textLine(line.strip() + '.')
+    c.drawText(txt_obj)
+
+    c.save()
 def parse_contents(contents, filename):
     logging.info(f"Parsing contents of file: {filename}")
     content_type, content_string = contents.split(',')
@@ -100,8 +126,8 @@ def parse_contents(contents, filename):
     State('upload-data', 'filename')
 )
 def update_output(contents, filename):
-    logging.info(
-        f"{os.environ['INSTANCE_CONNECTION_NAME']}, {os.environ['DB_USER']}, {os.environ['DB_PASS']}, {os.environ['DB_NAME']}")
+    # logging.info(
+    #     f"{os.environ['INSTANCE_CONNECTION_NAME']}, {os.environ['DB_USER']}, {os.environ['DB_PASS']}, {os.environ['DB_NAME']}")
 
     if contents is not None:
         snps = parse_contents(contents, filename)
@@ -133,20 +159,25 @@ def generate_report(n_clicks, contents, filename):
         logging.info("Submit button clicked.")
         snps = parse_contents(contents, filename)
         if snps is not None:
-            # Connect to the database and generate the report
-            logging.info("Connecting to the database.")
-            engine = connect_to_database()
-            with engine.connect() as conn:
-                logging.info("Assembling report data.")
-                report_data = assemble_report_data(conn, snps)
-                output_pdf = os.path.abspath("genomic_report.pdf")
-                logging.info(f"Output PDF path: {output_pdf}")
-                logging.info("Generating PDF report.")
-                generate_pdf(report_data, output_pdf, conn)
-                logging.info("Report generated successfully.")
-                return html.Div([
-                    html.H6("Report generated successfully.")
-                ]), f"/download/{output_pdf}", {"display": "block"}
+            output_pdf = os.path.join("reports", "genomic_report.pdf")
+            dummy_generate_pdf(output_pdf)
+            return html.Div([
+                html.H6("Report generated successfully.")
+            ]), f"/download/{os.path.basename(output_pdf)}", {"display": "block"}
+            # # Connect to the database and generate the report
+            # logging.info("Connecting to the database.")
+            # engine = connect_to_database()
+            # with engine.connect() as conn:
+            #     logging.info("Assembling report data.")
+            #     report_data = assemble_report_data(conn, snps)
+            #     output_pdf = os.path.join("reports", "genomic_report.pdf")
+            #     logging.info(f"Output PDF path: {output_pdf}")
+            #     logging.info("Generating PDF report.")
+            #     generate_pdf(report_data, output_pdf, conn)
+            #     logging.info("Report generated successfully.")
+                # return html.Div([
+                #     html.H6("Report generated successfully.")
+                # ]), f"/download/{os.path.basename(output_pdf)}", {"display": "block"}
         else:
             logging.error("Error processing the file for report generation.")
             return html.Div([
@@ -158,10 +189,11 @@ def generate_report(n_clicks, contents, filename):
 @app.server.route('/download/<path:filename>')
 def download_file(filename):
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-    file_path = os.path.join(base_dir, filename)
+    file_path = os.path.join(base_dir, 'reports', filename)
     logging.info(f"Downloading file: {file_path}")
     return send_file(file_path, as_attachment=True)
 
 
 if __name__ == '__main__':
+    os.makedirs("reports", exist_ok=True)
     app.run_server(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))

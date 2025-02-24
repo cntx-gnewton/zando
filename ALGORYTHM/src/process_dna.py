@@ -23,7 +23,7 @@ logging.basicConfig(
 )
 logger.setLevel(logging.DEBUG)
 
-logger.info(f"{os.environ['INSTANCE_CONNECTION_NAME']}, {os.environ['DB_USER']}, {os.environ['DB_PASS']}, {os.environ['DB_NAME']}")
+# logger.info(f"{os.environ['INSTANCE_CONNECTION_NAME']}, {os.environ['DB_USER']}, {os.environ['DB_PASS']}, {os.environ['DB_NAME']}")
 
  
 def read_dna_file(file_path):

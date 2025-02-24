@@ -11,9 +11,9 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from process_dna import read_dna_file, connect_to_database, assemble_report_data, generate_pdf
 import logging
+
 # from dotenv import load_dotenv
 # load_dotenv()
-
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -22,6 +22,10 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
+
+# Define the absolute path for reports
+absolute_report_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'reports'))
+os.makedirs(absolute_report_path, exist_ok=True)
 
 # Initialize the Dash app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -165,7 +169,7 @@ def generate_report(n_clicks, contents, filename, test_checkbox):
         logging.info("Submit button clicked.")
         snps = parse_contents(contents, filename)
         if snps is not None:
-            output_pdf = os.path.join("reports", "genomic_report.pdf")
+            output_pdf = os.path.join(absolute_report_path, "genomic_report.pdf")
             if test_checkbox:
                 dummy_generate_pdf(output_pdf)
             else:
@@ -192,12 +196,10 @@ def generate_report(n_clicks, contents, filename, test_checkbox):
 
 @app.server.route('/download/<path:filename>')
 def download_file(filename):
-    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-    file_path = os.path.join(base_dir, 'reports', filename)
+    file_path = os.path.join(absolute_report_path, filename)
     logging.info(f"Downloading file: {file_path}")
     return send_file(file_path, as_attachment=True)
 
 
 if __name__ == '__main__':
-    os.makedirs("reports", exist_ok=True)
     app.run_server(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))

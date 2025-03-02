@@ -12,8 +12,12 @@ from reportlab.pdfgen import canvas
 from process_dna import read_dna_file, connect_to_database, assemble_report_data, generate_pdf
 import logging
 
-# from dotenv import load_dotenv
-# load_dotenv()
+
+if os.environ.get('DEBUG',False):
+    from dotenv import load_dotenv
+    load_dotenv()
+    
+    
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -22,6 +26,7 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
+
 
 # Define the absolute path for reports
 absolute_report_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'reports'))
@@ -202,4 +207,4 @@ def download_file(filename):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+    app.run_server(debug=os.environ.get('DEBUG',False), host=os.environ.get('HOST','0.0.0.0'), port=int(os.environ.get('PORT', 8080)))

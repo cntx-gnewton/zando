@@ -9,13 +9,13 @@ import pandas as pd
 from flask import send_file
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-from process_dna import read_dna_file, connect_to_database, assemble_report_data, generate_pdf
+from process_dna import read_dna_file, connect_to_database, assemble_report_data, generate_pdf, generate_markdown
 import logging
 
 
-if os.environ.get('DEBUG',False):
-    from dotenv import load_dotenv
-    load_dotenv()
+# if os.environ.get('DEBUG', False):
+from dotenv import load_dotenv
+load_dotenv()
     
     
 # Configure logging
@@ -91,30 +91,41 @@ app.layout = dbc.Container([
 def dummy_generate_pdf(output_path):
     """
     Creates a dummy PDF with Lorem Ipsum text for testing purposes.
+    Using markdown_to_pdf for consistent styling.
     """
-    c = canvas.Canvas(output_path, pagesize=letter)
-    width, height = letter
+    # Create markdown content for the dummy report
+    markdown_content = """# Dummy Report
+## A test report generated for demonstration purposes
 
-    c.setFont("Helvetica-Bold", 20)
-    c.drawString(50, height - 50, "Lorem Ipsum Report")
-    c.setFont("Helvetica", 12)
-    c.drawString(50, height - 75, "A dummy report for testing purposes")
+## Summary
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 
-    lorem_ipsum_text = (
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
-        "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. "
-        "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. "
-        "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. "
-        "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-    )
+## Sample Data
 
-    c.setFont("Helvetica", 10)
-    txt_obj = c.beginText(50, height - 110)
-    for line in lorem_ipsum_text.split('. '):
-        txt_obj.textLine(line.strip() + '.')
-    c.drawText(txt_obj)
+| Column 1 | Column 2 | Column 3 |
+|----------|----------|----------|
+| Data 1   | Data 2   | Data 3   |
+| More 1   | More 2   | More 3   |
 
-    c.save()
+## Key Points
+
+### Section 1
+- **Point A**: Important information about point A
+- **Point B**: Additional details about point B
+
+### Section 2
+- **Item 1**: Description of item 1
+- **Item 2**: Description of item 2
+
+## Conclusion
+This is a dummy report generated for testing purposes. The actual report will contain genomic analysis based on uploaded DNA data.
+"""
+    
+    # Use the markdown_to_pdf function from process_dna.py
+    from process_dna import markdown_to_pdf
+    markdown_to_pdf(markdown_content, output_path)
+    
+    return output_path
 
 def parse_contents(contents, filename):
     logging.info(f"Parsing contents of file: {filename}")
@@ -164,6 +175,7 @@ def update_output(contents, filename):
     Output('loading-output', 'children'),
     Output('download-link', 'href'),
     Output('download-link', 'style'),
+    Output('download-link', 'children'),
     Input('submit-button', 'n_clicks'),
     State('upload-data', 'contents'),
     State('upload-data', 'filename'),
@@ -174,9 +186,12 @@ def generate_report(n_clicks, contents, filename, test_checkbox):
         logging.info("Submit button clicked.")
         snps = parse_contents(contents, filename)
         if snps is not None:
-            output_pdf = os.path.join(absolute_report_path, "genomic_report.pdf")
+            # Use PDF for output
+            output_file = os.path.join(absolute_report_path, "genomic_report.pdf")
+            button_label = "Download Report"
+                
             if test_checkbox:
-                dummy_generate_pdf(output_pdf)
+                dummy_generate_pdf(output_file)
             else:
                 # Connect to the database and generate the report
                 logging.info("Connecting to the database.")
@@ -184,19 +199,23 @@ def generate_report(n_clicks, contents, filename, test_checkbox):
                 with engine.connect() as conn:
                     logging.info("Assembling report data.")
                     report_data = assemble_report_data(conn, snps)
-                    logging.info(f"Output PDF path: {output_pdf}")
+                    logging.info(f"Output file path: {output_file}")
+                    
+                    # Always use markdown-styled PDF generation
                     logging.info("Generating PDF report.")
-                    generate_pdf(report_data, output_pdf, conn)
+                    generate_markdown(report_data, output_file, conn)
+                    
                     logging.info("Report generated successfully.")
+                    
             return html.Div([
                 html.H6("Report generated successfully.")
-            ]), f"/download/{os.path.basename(output_pdf)}", {"display": "block"}
+            ]), f"/download/{os.path.basename(output_file)}", {"display": "block"}, button_label
         else:
             logging.error("Error processing the file for report generation.")
             return html.Div([
                 html.H6("There was an error processing the file.")
-            ]), "", {"display": "none"}
-    return "", "", {"display": "none"}
+            ]), "", {"display": "none"}, "Download Report"
+    return "", "", {"display": "none"}, "Download Report"
 
 
 @app.server.route('/download/<path:filename>')

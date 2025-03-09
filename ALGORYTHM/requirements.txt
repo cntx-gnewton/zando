@@ -13,3 +13,4 @@ pg8000
 cloud-sql-python-connector
 reportlab
 python-dotenv
+markdown

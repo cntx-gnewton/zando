@@ -4,6 +4,10 @@ import json
 import os
 import time
 import logging
+import hashlib
+import pickle
+from datetime import datetime, timedelta
+from pathlib import Path
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -28,6 +32,111 @@ logging.basicConfig(
     ]
 )
 logger.setLevel(logging.DEBUG)
+
+# Cache settings
+CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cache')
+CACHE_EXPIRY = timedelta(days=7)  # Cache files expire after 7 days
+
+# Create cache directory if it doesn't exist
+os.makedirs(CACHE_DIR, exist_ok=True)
+
+def compute_file_hash(file_content):
+    """
+    Compute a hash of the file content for cache lookup.
+    
+    Args:
+        file_content: The content of the DNA file
+        
+    Returns:
+        str: A hex digest hash of the content
+    """
+    hash_obj = hashlib.sha256(file_content.encode('utf-8') if isinstance(file_content, str) else file_content)
+    return hash_obj.hexdigest()
+
+def get_cache_path(file_hash, format_type='json'):
+    """
+    Get the path to a cache file for the given hash.
+    
+    Args:
+        file_hash: Hash of the file content
+        format_type: Type of cache file ('json', 'pdf', 'md')
+        
+    Returns:
+        Path: Path object for the cache file
+    """
+    return Path(CACHE_DIR) / f"{file_hash}.{format_type}"
+
+def save_to_cache(data, file_hash, format_type='json'):
+    """
+    Save data to the cache.
+    
+    Args:
+        data: Data to cache (dict for 'json', bytes for 'pdf'/'md')
+        file_hash: Hash of the file content
+        format_type: Type of data being cached ('json', 'pdf', 'md')
+    """
+    cache_path = get_cache_path(file_hash, format_type)
+    
+    if format_type == 'json':
+        # Save metadata with the cache
+        cache_data = {
+            'data': data,
+            'timestamp': datetime.now().isoformat(),
+            'hash': file_hash
+        }
+        with open(cache_path, 'wb') as f:
+            pickle.dump(cache_data, f)
+    else:
+        # Binary data (PDF, etc.)
+        with open(cache_path, 'wb') as f:
+            f.write(data)
+    
+    logger.info(f"Saved {format_type} cache file: {cache_path}")
+
+def load_from_cache(file_hash, format_type='json'):
+    """
+    Load data from the cache if available and not expired.
+    
+    Args:
+        file_hash: Hash of the file content
+        format_type: Type of data to load ('json', 'pdf', 'md')
+        
+    Returns:
+        The cached data if available and not expired, None otherwise
+    """
+    cache_path = get_cache_path(file_hash, format_type)
+    
+    if not cache_path.exists():
+        return None
+        
+    # Check if cache is expired
+    file_age = datetime.now() - datetime.fromtimestamp(cache_path.stat().st_mtime)
+    if file_age > CACHE_EXPIRY:
+        logger.info(f"Cache expired ({file_age.days} days old): {cache_path}")
+        cache_path.unlink(missing_ok=True)
+        return None
+    
+    if format_type == 'json':
+        try:
+            with open(cache_path, 'rb') as f:
+                cache_data = pickle.load(f)
+            logger.info(f"Loaded cache from {cache_path}, created at {cache_data['timestamp']}")
+            return cache_data['data']
+        except (pickle.PickleError, KeyError, EOFError) as e:
+            logger.warning(f"Error loading cache: {e}")
+            cache_path.unlink(missing_ok=True)
+            return None
+    else:
+        # Binary data (PDF, etc.)
+        try:
+            with open(cache_path, 'rb') as f:
+                data = f.read()
+            logger.info(f"Loaded {format_type} from cache: {cache_path}")
+            return data
+        except IOError as e:
+            logger.warning(f"Error loading {format_type} cache: {e}")
+            cache_path.unlink(missing_ok=True)
+            return None
 
 # logger.info(f"{os.environ['INSTANCE_CONNECTION_NAME']}, {os.environ['DB_USER']}, {os.environ['DB_PASS']}, {os.environ['DB_NAME']}")
 
@@ -58,7 +167,46 @@ def verify_and_read_txt(filepath):
 
     return []
 
-def read_dna_file(filepath):
+def compute_file_hash_from_path(filepath):
+    """
+    Compute a hash of a file for cache lookup.
+    
+    Args:
+        filepath: Path to the file
+        
+    Returns:
+        str: A hex digest hash of the file content
+    """
+    hash_obj = hashlib.sha256()
+    with open(filepath, 'rb') as f:
+        # Read in chunks to handle large files
+        for chunk in iter(lambda: f.read(4096), b''):
+            hash_obj.update(chunk)
+    return hash_obj.hexdigest()
+
+def read_dna_file(filepath, use_cache=True):
+    """
+    Reads and parses a DNA file, with optional caching.
+    
+    Args:
+        filepath: Path to the DNA file
+        use_cache: Whether to use/update cache (default: True)
+        
+    Returns:
+        List of dictionaries with SNP data
+    """
+    # Check for cached version if caching is enabled
+    if use_cache:
+        file_hash = compute_file_hash_from_path(filepath)
+        cached_data = load_from_cache(file_hash)
+        if cached_data is not None:
+            logger.info(f"Using cached SNP data for {filepath}")
+            return cached_data
+    
+    # No cache hit or caching disabled, parse the file
+    logger.info(f"Parsing DNA file: {filepath}")
+    start_time = time.time()
+    
     columns = verify_and_read_txt(filepath)
     if not columns:
         raise ValueError("The file does not contain the expected columns")
@@ -70,8 +218,20 @@ def read_dna_file(filepath):
     if 'genotype' in df.columns:
         df[['allele1', 'allele2']] = df['genotype'].apply(lambda x: pd.Series(list(x)))
         df.drop(columns=['genotype'], inplace=True)
-
-    return df.to_dict(orient='records')
+    
+    # Convert to records
+    parsed_data = df.to_dict(orient='records')
+    
+    elapsed_time = time.time() - start_time
+    logger.info(f"Parsed {len(parsed_data)} SNP records from {filepath} in {elapsed_time:.2f}s")
+    
+    # Cache the parsed data if caching is enabled
+    if use_cache:
+        file_hash = compute_file_hash_from_path(filepath)
+        save_to_cache(parsed_data, file_hash)
+        logger.info(f"Cached parsed SNP data for {filepath}")
+    
+    return parsed_data
 # def read_dna_file(file_path):
 #     """
 #     Reads an AncestryDNA raw data .txt file and extracts SNP records.
@@ -101,21 +261,35 @@ def read_dna_file(filepath):
 #                 })
 #     return snps
 
-def connect_to_database() -> sqlalchemy.engine.base.Engine:
-    """
-    Initializes a connection pool for a Cloud SQL instance of Postgres.
+# Global connection pool
+_engine = None
 
-    Uses the Cloud SQL Python Connector package.
+def get_db_engine() -> sqlalchemy.engine.base.Engine:
     """
+    Returns a global SQLAlchemy engine instance with connection pooling.
+    
+    This creates a singleton engine that can be reused across requests,
+    improving performance by avoiding repeated connection establishment.
+    
+    Returns:
+        SQLAlchemy engine with connection pooling
+    """
+    global _engine
+    
+    if _engine is not None:
+        # Return existing engine if already created
+        return _engine
+    
+    # Create new engine if none exists
     instance_connection_name = os.environ["INSTANCE_CONNECTION_NAME"]
     db_user = os.environ["DB_USER"]
     db_pass = os.environ["DB_PASS"]
     db_name = os.environ["DB_NAME"]
-
+    
     ip_type = IPTypes.PRIVATE if os.environ.get("PRIVATE_IP") else IPTypes.PUBLIC
-
+    
     connector = Connector(refresh_strategy="LAZY")
-
+    
     def getconn() -> pg8000.dbapi.Connection:
         conn: pg8000.dbapi.Connection = connector.connect(
             instance_connection_name,
@@ -126,12 +300,32 @@ def connect_to_database() -> sqlalchemy.engine.base.Engine:
             ip_type=ip_type,
         )
         return conn
-
-    pool = sqlalchemy.create_engine(
+    
+    # Configure pooling parameters for better performance
+    _engine = sqlalchemy.create_engine(
         "postgresql+pg8000://",
         creator=getconn,
+        # Pool settings
+        pool_size=5,               # Default number of connections to maintain
+        max_overflow=10,           # Allow up to 10 additional connections on high load
+        pool_timeout=30,           # Wait up to 30 seconds for a connection
+        pool_recycle=1800,         # Recycle connections after 30 minutes
+        pool_pre_ping=True         # Check connection viability before using
     )
-    return pool
+    
+    logger.info("Database connection pool initialized")
+    return _engine
+
+def connect_to_database() -> sqlalchemy.engine.base.Engine:
+    """
+    Initializes a connection pool for a Cloud SQL instance of Postgres.
+    
+    Uses the Cloud SQL Python Connector package with connection pooling.
+    
+    Returns:
+        SQLAlchemy engine with connection pooling
+    """
+    return get_db_engine()
 
 
 def load_snp_table(conn):

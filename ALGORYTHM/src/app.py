@@ -9,7 +9,11 @@ import pandas as pd
 from flask import send_file
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-from process_dna import read_dna_file, connect_to_database, assemble_report_data, generate_pdf, generate_markdown
+from process_dna import (
+    read_dna_file, connect_to_database, assemble_report_data, 
+    generate_pdf, generate_markdown, compute_file_hash,
+    load_from_cache, save_to_cache
+)
 import logging
 
 
@@ -128,16 +132,36 @@ This is a dummy report generated for testing purposes. The actual report will co
     return output_path
 
 def parse_contents(contents, filename):
+    """
+    Parse uploaded file contents, with caching support.
+    """
     logging.info(f"Parsing contents of file: {filename}")
     content_type, content_string = contents.split(',')
     decoded = base64.b64decode(content_string)
+    
+    # Create a hash of the file content for cache lookup
+    file_hash = compute_file_hash(decoded)
+    
+    # Check if we have a cached version of this file
+    cached_snps = load_from_cache(file_hash)
+    if cached_snps is not None:
+        logging.info(f"Using cached parsed data for {filename}")
+        return cached_snps
+    
+    # No cache hit, proceed with parsing
     try:
         if 'txt' in filename:
             # Assume that the user uploaded a text file
             with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as temp_file:
                 temp_file.write(decoded.decode('utf-8'))
                 temp_file_path = temp_file.name
-            snps = read_dna_file(temp_file_path)
+            
+            # Parse the file (with caching disabled since we're handling it here)
+            snps = read_dna_file(temp_file_path, use_cache=False)
+            
+            # Cache the parsed data
+            save_to_cache(snps, file_hash)
+            
             logging.info("File parsed successfully.")
             return snps
         else:
@@ -184,15 +208,37 @@ def update_output(contents, filename):
 def generate_report(n_clicks, contents, filename, test_checkbox):
     if n_clicks is not None and contents is not None:
         logging.info("Submit button clicked.")
+        
+        # Create a unique file name based on content hash
+        content_type, content_string = contents.split(',')
+        decoded = base64.b64decode(content_string)
+        file_hash = compute_file_hash(decoded)
+        
+        # Use PDF for output with hash in filename for uniqueness
+        output_file = os.path.join(absolute_report_path, f"genomic_report_{file_hash[:8]}.pdf")
+        button_label = "Download Report"
+        
+        # Check if we already have a cached report for this file
+        cached_pdf = load_from_cache(file_hash, format_type='pdf')
+        if cached_pdf is not None and not test_checkbox:
+            logging.info("Using cached PDF report.")
+            
+            # Write the cached PDF to the output location
+            with open(output_file, 'wb') as f:
+                f.write(cached_pdf)
+                
+            return html.Div([
+                html.H6("Report generated successfully (from cache).")
+            ]), f"/download/{os.path.basename(output_file)}", {"display": "block"}, button_label
+        
+        # No cache hit or test mode, parse and generate report
         snps = parse_contents(contents, filename)
         if snps is not None:
-            # Use PDF for output
-            output_file = os.path.join(absolute_report_path, "genomic_report.pdf")
-            button_label = "Download Report"
-                
             if test_checkbox:
                 dummy_generate_pdf(output_file)
             else:
+                start_time = time.time()
+                
                 # Connect to the database and generate the report
                 logging.info("Connecting to the database.")
                 engine = connect_to_database()
@@ -205,7 +251,13 @@ def generate_report(n_clicks, contents, filename, test_checkbox):
                     logging.info("Generating PDF report.")
                     generate_markdown(report_data, output_file, conn)
                     
-                    logging.info("Report generated successfully.")
+                    # Cache the generated PDF
+                    with open(output_file, 'rb') as f:
+                        pdf_data = f.read()
+                    save_to_cache(pdf_data, file_hash, format_type='pdf')
+                    
+                    elapsed_time = time.time() - start_time
+                    logging.info(f"Report generated successfully in {elapsed_time:.2f}s.")
                     
             return html.Div([
                 html.H6("Report generated successfully.")

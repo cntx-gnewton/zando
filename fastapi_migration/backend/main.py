@@ -88,6 +88,11 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 async def health_check():
     return {"status": "ok", "api_version": "1.0.0"}
 
+@app.get("/api/v1/health")
+async def api_health_check():
+    """Health check endpoint for Docker"""
+    return {"status": "ok", "api_version": "1.0.0", "service": "genomic-analysis-api"}
+
 # Root endpoint redirects to docs
 @app.get("/")
 async def root():

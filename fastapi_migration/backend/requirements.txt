@@ -20,7 +20,11 @@ pytest>=7.3.1
 pytest-asyncio>=0.21.0
 PyJWT>=2.6.0
 pydantic_settings
+pdfkit>=1.0.0
 
 # Google Cloud SQL dependencies
 cloud-sql-python-connector[pg8000]>=1.2.0
 google-cloud-secret-manager>=2.13.0
+
+# Docker health check
+requests>=2.28.0

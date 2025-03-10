@@ -1,0 +1,27 @@
+command logs:
+---
+(.venv) greysonnewton@gnnewton-macbook zando % curl -X GET http://localhost:8000/api/v1/analysis/list
+
+{"detail":"Error listing analyses: (pg8000.exceptions.DatabaseError) {'S': 'ERROR', 'V': 'ERROR', 'C': '42883', 'M': 'function jsonb_typeof(json) does not exist', 'H': 'No function matches the given name and argument types. You might need to add explicit type casts.', 'P': '88', 'F': 'parse_func.c', 'L': '636', 'R': 'ParseFuncOrColumn'}\n[SQL: \n        SELECT analysis_id, file_hash, status, created_at, \n               (CASE WHEN jsonb_typeof(data->'mutations') = 'array' \n                     THEN jsonb_array_length(data->'mutations') \n                     ELSE 0 \n                END) as snp_count\n        FROM analyses \n        WHERE status = 'completed'\n        ORDER BY created_at DESC\n        LIMIT %s OFFSET %s\n        ]\n[parameters: (50, 0)]\n(Background on this error at: https://sqlalche.me/e/20/4xp6)"}%      (.venv) greysonnewton@gnnewton-macbook zando %
+
+---
+
+fastapi logs:
+---
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2025-03-09 21:39:01,295 - app.api.v1.endpoints.analysis - ERROR - Error listing analyses: (pg8000.exceptions.DatabaseError) {'S': 'ERROR', 'V': 'ERROR', 'C': '42883', 'M': 'function jsonb_typeof(json) does not exist', 'H': 'No function matches the given name and argument types. You might need to add explicit type casts.', 'P': '88', 'F': 'parse_func.c', 'L': '636', 'R': 'ParseFuncOrColumn'}
+[SQL:
+        SELECT analysis_id, file_hash, status, created_at,
+               (CASE WHEN jsonb_typeof(data->'mutations') = 'array'
+                     THEN jsonb_array_length(data->'mutations')
+                     ELSE 0
+                END) as snp_count
+        FROM analyses
+        WHERE status = 'completed'
+        ORDER BY created_at DESC
+        LIMIT %s OFFSET %s
+        ]
+[parameters: (50, 0)]
+(Background on this error at: https://sqlalche.me/e/20/4xp6)
+INFO:     127.0.0.1:53884 - "GET /api/v1/analysis/list HTTP/1.1" 500 Internal Server Errorit
+---

@@ -44,6 +44,6 @@ def read_genetic_data(filepath):
     return df.to_dict(orient='records')
 
 if __name__ == '__main__':
-    df = read_genetic_data('AncestoryData.txt')
+    df = read_genetic_data('__AncestoryData.txt')
     genome_data = df.to_dict(orient='records')
     print(df.head())

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaUpload, FaDna, FaFileAlt } from 'react-icons/fa';
+import { FaFileMedical, FaDna, FaFileAlt } from 'react-icons/fa';
 
 const HomePage: React.FC = () => {
   return (
@@ -16,11 +16,11 @@ const HomePage: React.FC = () => {
           </p>
           <div className="mt-8 flex justify-center">
             <Link
-              to="/upload"
+              to="/report"
               className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
             >
-              <FaUpload className="mr-2" />
-              Upload Your DNA
+              <FaFileMedical className="mr-2" />
+              Generate Your Report
             </Link>
           </div>
         </div>
@@ -42,9 +42,9 @@ const HomePage: React.FC = () => {
               <div className="space-y-10 md:space-y-0 md:grid md:grid-cols-3 md:gap-8">
                 <div className="text-center">
                   <div className="flex items-center justify-center h-16 w-16 rounded-md bg-blue-500 text-white mx-auto">
-                    <FaUpload className="h-8 w-8" />
+                    <FaFileMedical className="h-8 w-8" />
                   </div>
-                  <h3 className="mt-4 text-lg font-medium text-gray-900">Upload DNA Data</h3>
+                  <h3 className="mt-4 text-lg font-medium text-gray-900">Generate Report</h3>
                   <p className="mt-2 text-base text-gray-500">
                     Simply upload your raw DNA data from 23andMe, Ancestry, or other genetic testing services.
                   </p>
@@ -86,10 +86,10 @@ const HomePage: React.FC = () => {
             </p>
             <div className="mt-8">
               <Link
-                to="/upload"
+                to="/report"
                 className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
               >
-                Start Your Analysis
+                Generate Your Report
               </Link>
             </div>
           </div>

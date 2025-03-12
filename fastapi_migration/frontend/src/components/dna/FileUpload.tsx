@@ -1,9 +1,11 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { FaUpload, FaFile, FaSpinner, FaCheckCircle } from 'react-icons/fa';
+import axios from 'axios';
 import { dnaApi } from '../../api/dnaApi';
 import { useAnalysis } from '../../hooks/useAnalysis';
 import { useNotification } from '../../hooks/useNotification';
+import { API_URL } from '../../config';
 
 type FileUploadProps = {
   onFileProcessed?: (fileHash: string) => void;
@@ -74,10 +76,15 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
       clearInterval(uploadTimeout.current as NodeJS.Timeout);
       setUploadProgress(0);
       
+      // Check if it's a network error (likely API connection issue)
+      const isNetworkError = axios.isAxiosError(error) && !error.response;
+      
       showNotification({
         type: 'error',
-        message: 'Error uploading file',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        message: isNetworkError ? 'API connection error' : 'Error uploading file',
+        details: isNetworkError 
+          ? `Could not connect to API at ${API_URL}. Please check your network connection.`
+          : (error instanceof Error ? error.message : 'Unknown error')
       });
       
       throw error;
@@ -177,6 +184,14 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
           relevant genetic information for skincare analysis and do not store your
           raw genetic data.
         </p>
+        
+        {/* API Connection Indicator */}
+        <div className="flex items-center mt-3 pt-3 border-t border-gray-200">
+          <div className="w-3 h-3 rounded-full mr-2 bg-green-500"></div>
+          <p className="text-xs text-gray-500">
+            Connected to API: {process.env.REACT_APP_API_URL || 'https://zando-272043323727.us-central1.run.app/api/v1'}
+          </p>
+        </div>
       </div>
     </div>
   );

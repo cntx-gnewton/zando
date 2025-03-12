@@ -21,8 +21,11 @@ COPY --from=build /app/build /usr/share/nginx/html
 # Copy nginx configuration
 COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port
-EXPOSE 80
+# Create a simple health check endpoint
+RUN echo "OK" > /usr/share/nginx/html/health
+
+# Expose port 8080 for Google Cloud Run
+EXPOSE 8080
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]

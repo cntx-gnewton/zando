@@ -2,19 +2,17 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   FaHome, 
-  FaUpload, 
-  FaDna, 
   FaFileAlt, 
   FaUser,
-  FaTachometerAlt
+  FaTachometerAlt,
+  FaFileMedical
 } from 'react-icons/fa';
 
 const Sidebar: React.FC = () => {
   const navigation = [
     { name: 'Home', to: '/', icon: FaHome },
     { name: 'Dashboard', to: '/dashboard', icon: FaTachometerAlt },
-    { name: 'Upload DNA', to: '/upload', icon: FaUpload },
-    { name: 'Analysis', to: '/analysis', icon: FaDna },
+    { name: 'Generate Report', to: '/report', icon: FaFileMedical },
     { name: 'Reports', to: '/reports', icon: FaFileAlt },
     { name: 'Account', to: '/account', icon: FaUser },
   ];

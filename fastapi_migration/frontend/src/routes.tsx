@@ -1,11 +1,10 @@
 import React from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
 
-// Page components (to be created)
+// Page components
 import HomePage from './pages/Home';
 import DashboardPage from './pages/Dashboard';
-import UploadPage from './pages/Upload';
-import AnalysisPage from './pages/Analysis';
+import ReportPage from './pages/ReportPage';
 import ReportsPage from './pages/Reports';
 import AccountPage from './pages/Account';
 import NotFoundPage from './pages/NotFound';
@@ -19,11 +18,13 @@ const AppRoutes: React.FC = () => {
       <Route path="/" element={<MainLayout />}>
         <Route index element={<HomePage />} />
         <Route path="dashboard" element={<DashboardPage />} />
-        <Route path="upload" element={<UploadPage />} />
-        <Route path="analysis">
-          <Route index element={<AnalysisPage />} />
-          <Route path=":analysisId" element={<AnalysisPage />} />
-        </Route>
+        <Route path="report" element={<ReportPage />} />
+        
+        {/* Redirects from old paths */}
+        <Route path="upload" element={<Navigate to="/report" replace />} />
+        <Route path="analysis" element={<Navigate to="/report" replace />} />
+        <Route path="analysis/:analysisId" element={<Navigate to="/report" replace />} />
+        
         <Route path="reports">
           <Route index element={<ReportsPage />} />
           <Route path=":reportId" element={<ReportsPage />} />

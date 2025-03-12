@@ -45,8 +45,10 @@ export interface UserReportsList {
 
 // Report type options
 export enum ReportType {
-  STANDARD = "standard",
-  MARKDOWN = "markdown"
+  FULL = "full",            // Comprehensive report with all data
+  STANDARD = "standard",    // Standard report
+  SKIN_ONLY = "skin_only",  // Skin focus only
+  SUMMARY = "summary"       // Brief summary of findings
 }
 
 // Report state for the application

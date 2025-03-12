@@ -14,13 +14,16 @@ export interface SNP extends SNPID {
 }
 
 export interface DNAFileUploadResponse {
-  filename: string;
+  file_name: string;
   file_hash: string;
+  file_size: number;
+  upload_date: string;
   status: string;
   snp_count?: number;
   processing_time?: number;
   message?: string;
   cached: boolean;
+  format?: string;
 }
 
 export interface ValidationStatistics {
@@ -62,6 +65,9 @@ export interface DNAUploadProgress {
 export interface FileFormat {
   name: string;
   description: string;
-  columns: string[];
-  example: string;
+  columns?: string[];
+  example?: string;
+  example_line?: string;
+  file_pattern?: string;
+  support_level: 'full' | 'partial' | 'experimental';
 }

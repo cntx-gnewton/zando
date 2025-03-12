@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { FaSpinner, FaExclamationTriangle, FaDna, FaLeaf } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import { FaSpinner, FaExclamationTriangle, FaDna, FaLeaf, FaArrowLeft, FaFileAlt, FaFingerprint } from 'react-icons/fa';
 import { useAnalysis } from '../../hooks/useAnalysis';
 import { analysisApi } from '../../api/analysisApi';
 import { AnalysisResult } from '../../types/analysis';
@@ -101,6 +102,33 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ analysisId, fileHash 
   
   return (
     <div className="space-y-8">
+      {/* Back button and info bar */}
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 bg-white rounded-lg shadow-md p-4">
+        <Link 
+          to="/upload" 
+          className="inline-flex items-center text-blue-600 hover:text-blue-800"
+        >
+          <FaArrowLeft className="mr-2" />
+          Back to Upload
+        </Link>
+        
+        <div className="flex flex-col md:flex-row gap-4 text-sm text-gray-600">
+          <div className="flex items-center">
+            <FaFingerprint className="mr-2 text-gray-500" />
+            <span className="font-medium">Analysis ID:</span>
+            <span className="ml-2">{results.analysis_id}</span>
+          </div>
+          
+          {currentAnalysis?.fileName && (
+            <div className="flex items-center">
+              <FaFileAlt className="mr-2 text-gray-500" />
+              <span className="font-medium">File:</span>
+              <span className="ml-2">{currentAnalysis.fileName}</span>
+            </div>
+          )}
+        </div>
+      </div>
+      
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Your Genetic Skin Profile</h2>
         

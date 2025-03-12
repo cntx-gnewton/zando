@@ -1,17 +1,20 @@
 import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import AppRoutes from './routes';
+import { AnalysisProvider } from './contexts/AnalysisContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import './App.css';
 
-function App() {
+const App: React.FC = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Zando Genomic Analysis</h1>
-        <p>
-          React frontend for the Zando Genomic Analysis platform is loading...
-        </p>
-      </header>
-    </div>
+    <BrowserRouter>
+      <NotificationProvider>
+        <AnalysisProvider>
+          <AppRoutes />
+        </AnalysisProvider>
+      </NotificationProvider>
+    </BrowserRouter>
   );
-}
+};
 
 export default App;

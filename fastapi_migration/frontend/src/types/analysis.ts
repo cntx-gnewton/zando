@@ -10,6 +10,16 @@ export interface GeneticCharacteristic {
   evidence_strength?: string;
 }
 
+// Mutation for the GeneCard component
+export interface Mutation {
+  rsid: string;
+  gene_name: string;
+  allele: string;
+  effect: string;
+  evidence_level: string;
+  category?: string;
+}
+
 export interface GeneticMutation {
   gene: string;
   rsid: string;
@@ -23,6 +33,14 @@ export interface GeneticMutation {
 }
 
 // Ingredient recommendations
+export interface IngredientRecommendation {
+  name: string;
+  benefit?: string;
+  caution?: string;
+  genes?: string[];
+  evidence_level?: string;
+}
+
 export interface BeneficialIngredient {
   ingredient_name: string;
   ingredient_mechanism?: string;
@@ -37,15 +55,13 @@ export interface IngredientCaution {
   alternative_ingredients?: string;
 }
 
-export interface IngredientRecommendations {
-  prioritize: BeneficialIngredient[];
-  caution: IngredientCaution[];
-}
-
 // Analysis data structure
 export interface AnalysisData {
-  mutations: GeneticMutation[];
-  ingredient_recommendations: IngredientRecommendations;
+  mutations: Mutation[];
+  ingredient_recommendations: {
+    beneficial: IngredientRecommendation[];
+    cautionary: IngredientRecommendation[];
+  };
   summary?: string;
 }
 

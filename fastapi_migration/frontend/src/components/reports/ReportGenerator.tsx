@@ -147,7 +147,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ onReportGenerated }) 
               <p className="text-sm text-gray-600">
                 {reportResponse.cached
                   ? 'Retrieved from previously generated report'
-                  : `Generated in ${reportResponse.processing_time.toFixed(1)}s`}
+                  : `Generated in ${reportResponse.processing_time?.toFixed(1) || '0.0'}s`}
               </p>
             </div>
           </div>

@@ -22,35 +22,54 @@ class AnalysisService:
     Handles database queries, SNP matching, and data processing.
     """
     
+    # Cache for reference data tables
+    _snp_cache = {}
+    _snp_cache_timestamp = None
+    
+    _characteristics_cache = {}
+    _characteristics_cache_timestamp = None
+    
+    _ingredients_cache = {}
+    _ingredients_cache_timestamp = None
+    
+    # Cache duration set to 1 day in seconds
+    _CACHE_DURATION = 24 * 60 * 60  # 1 day in seconds
+    
     @staticmethod
-    async def get_batch_snp_details(conn, rsids: List[str]) -> Dict[str, Dict[str, Any]]:
+    async def get_all_snps_cached(conn) -> Dict[str, Dict[str, Any]]:
         """
-        Retrieves SNP details for multiple rsids in a single database query.
+        Retrieves entire SNP table with a 1-day cache duration.
         
         Args:
             conn: Database connection
-            rsids: List of rsid values to retrieve
             
         Returns:
             Dictionary mapping rsids to their details
         """
-        if not rsids:
-            return {}
+        # Check if cache is valid
+        current_time = time.time()
         
-        logger.info(f"Batch fetching {len(rsids)} SNP records")
+        # If cache exists and is not expired, use it
+        if (AnalysisService._snp_cache and 
+            AnalysisService._snp_cache_timestamp and 
+            current_time - AnalysisService._snp_cache_timestamp < AnalysisService._CACHE_DURATION):
+            logger.info(f"Using cached SNP table ({len(AnalysisService._snp_cache)} records)")
+            return AnalysisService._snp_cache
+        
+        # Otherwise, fetch all SNPs from database
+        logger.info("Fetching complete SNP table from database and caching")
         
         query = """
             SELECT snp_id, rsid, gene, risk_allele, effect, evidence_strength, category 
             FROM snp
-            WHERE rsid = ANY(:rsids)
         """
         
-        results = await conn.execute(text(query), {'rsids': rsids})
+        results = await conn.execute(text(query))
         results = results.fetchall()
         
         # Convert to dictionary for fast lookup
         snp_details = {}
-        logging.info(f'Fetched {len(results)} SNP records {results[:15]}')
+        logging.info(f'Fetched {len(results)} SNP records for cache')
         
         for row in results:
             # Handle both tuple and attribute access formats
@@ -78,36 +97,72 @@ class AnalysisService:
                     'category': row[6]
                 }
         
-        logger.info(f"Found {len(snp_details)} matching SNPs in database")
+        # Update the cache
+        AnalysisService._snp_cache = snp_details
+        AnalysisService._snp_cache_timestamp = current_time
+        
+        logger.info(f"SNP table cache updated with {len(snp_details)} records")
         return snp_details
     
     @staticmethod
-    async def get_batch_characteristics(conn, snp_ids: List[int]) -> Dict[int, List[Dict[str, Any]]]:
+    async def get_batch_snp_details(conn, rsids: List[str]) -> Dict[str, Dict[str, Any]]:
         """
-        Fetches related skin characteristics for multiple SNP IDs in a single query.
+        Retrieves SNP details for multiple rsids from cache or database.
         
         Args:
             conn: Database connection
-            snp_ids: List of SNP IDs to retrieve characteristics for
+            rsids: List of rsid values to retrieve
+            
+        Returns:
+            Dictionary mapping rsids to their details
+        """
+        if not rsids:
+            return {}
+        
+        logger.info(f"Looking up {len(rsids)} SNP records")
+        
+        # Get the full SNP cache
+        all_snps = await AnalysisService.get_all_snps_cached(conn)
+        
+        # Filter only the requested RSIDs
+        snp_details = {rsid: details for rsid, details in all_snps.items() if rsid in rsids}
+        
+        logger.info(f"Found {len(snp_details)} matching SNPs in cache")
+        return snp_details
+    
+    @staticmethod
+    async def get_all_characteristics_cached(conn) -> Dict[int, List[Dict[str, Any]]]:
+        """
+        Retrieves all characteristics and their SNP associations with caching.
+        
+        Args:
+            conn: Database connection
             
         Returns:
             Dictionary mapping SNP IDs to lists of characteristic dictionaries
         """
-        if not snp_ids:
-            return {}
+        # Check if cache is valid
+        current_time = time.time()
         
-        logger.info(f"Batch fetching characteristics for {len(snp_ids)} SNPs")
+        # If cache exists and is not expired, use it
+        if (AnalysisService._characteristics_cache and 
+            AnalysisService._characteristics_cache_timestamp and 
+            current_time - AnalysisService._characteristics_cache_timestamp < AnalysisService._CACHE_DURATION):
+            logger.info(f"Using cached characteristics (for {len(AnalysisService._characteristics_cache)} SNPs)")
+            return AnalysisService._characteristics_cache
+        
+        # Otherwise, fetch all characteristic data from database
+        logger.info("Fetching all characteristic data from database and caching")
         
         query = """
             SELECT scl.snp_id, c.name, c.description, scl.effect_direction, scl.evidence_strength
             FROM SNP_Characteristic_Link scl
             JOIN SkinCharacteristic c ON scl.characteristic_id = c.characteristic_id
-            WHERE scl.snp_id = ANY(:snp_ids)
         """
         
-        results = await conn.execute(text(query), {'snp_ids': snp_ids})
+        results = await conn.execute(text(query))
         results = results.fetchall()
-        logging.info(f"Fetched {len(results)} characteristics records")
+        logging.info(f"Fetched {len(results)} characteristics records for cache")
         
         # Group characteristics by SNP ID
         characteristics_by_snp = {}
@@ -140,77 +195,99 @@ class AnalysisService:
                     'evidence_strength': row[4]
                 })
         
-        # Log results summary
-        found_snps = len(characteristics_by_snp)
+        # Update the cache
+        AnalysisService._characteristics_cache = characteristics_by_snp
+        AnalysisService._characteristics_cache_timestamp = current_time
+        
+        # Log results
         total_chars = sum(len(chars) for chars in characteristics_by_snp.values())
-        logger.info(f"Found characteristics for {found_snps} SNPs, total of {total_chars} characteristics")
+        logger.info(f"Characteristics cache updated with {total_chars} records for {len(characteristics_by_snp)} SNPs")
         
         return characteristics_by_snp
     
     @staticmethod
-    async def get_batch_ingredients(conn, snp_ids: List[int]) -> Dict[int, Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]]:
+    async def get_batch_characteristics(conn, snp_ids: List[int]) -> Dict[int, List[Dict[str, Any]]]:
         """
-        Retrieves beneficial and cautionary ingredients for multiple SNP IDs in a single query.
+        Fetches related skin characteristics for multiple SNP IDs using cached data.
         
         Args:
             conn: Database connection
-            snp_ids: List of SNP IDs to retrieve ingredients for
+            snp_ids: List of SNP IDs to retrieve characteristics for
             
         Returns:
-            Dictionary mapping SNP IDs to tuples of (beneficial_list, caution_list)
+            Dictionary mapping SNP IDs to lists of characteristic dictionaries
         """
         if not snp_ids:
             return {}
         
-        logger.info(f"Batch fetching ingredients for {len(snp_ids)} SNPs")
+        logger.info(f"Looking up characteristics for {len(snp_ids)} SNPs")
         
-        # Get rsids for the given snp_ids (needed for beneficial ingredients)
-        rsid_query = """
-            SELECT snp_id, rsid
-            FROM snp
-            WHERE snp_id = ANY(:snp_ids)
+        # Get the full characteristics cache
+        all_characteristics = await AnalysisService.get_all_characteristics_cached(conn)
+        
+        # Filter only the requested SNP IDs
+        characteristics_by_snp = {snp_id: chars for snp_id, chars in all_characteristics.items() if snp_id in snp_ids}
+        
+        # Log results summary
+        found_snps = len(characteristics_by_snp)
+        total_chars = sum(len(chars) for chars in characteristics_by_snp.values())
+        logger.info(f"Found characteristics for {found_snps} SNPs, total of {total_chars} characteristics in cache")
+        
+        return characteristics_by_snp
+    
+    @staticmethod
+    async def get_all_ingredients_cached(conn) -> Dict[int, Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]]:
         """
-        result = await conn.execute(text(rsid_query), {'snp_ids': snp_ids})
-        rsid_results = result.fetchall()
-        logging.info(f"Fetched {len(rsid_results)} rsid mappings")
+        Retrieves all ingredients (beneficial and cautionary) with caching.
         
-        # Create mapping of snp_id to rsid
-        snp_to_rsid = {}
-        for row in rsid_results:
-            try:
-                # Try attribute access first
-                snp_to_rsid[row.snp_id] = row.rsid
-            except (AttributeError, TypeError):
-                # Fall back to index-based access
-                # Index positions: 0=snp_id, 1=rsid
-                snp_to_rsid[row[0]] = row[1]
+        Args:
+            conn: Database connection
+            
+        Returns:
+            Dictionary mapping SNP IDs to tuples of (beneficial_list, caution_list)
+        """
+        # Check if cache is valid
+        current_time = time.time()
         
-        # Get all beneficial ingredients in one query
+        # If cache exists and is not expired, use it
+        if (AnalysisService._ingredients_cache and 
+            AnalysisService._ingredients_cache_timestamp and 
+            current_time - AnalysisService._ingredients_cache_timestamp < AnalysisService._CACHE_DURATION):
+            logger.info(f"Using cached ingredients (for {len(AnalysisService._ingredients_cache)} SNPs)")
+            return AnalysisService._ingredients_cache
+        
+        # Otherwise, fetch all ingredients data from database
+        logger.info("Fetching all ingredients data from database and caching")
+        
+        # First get all SNP IDs from the database for initialization
+        snp_id_query = "SELECT snp_id FROM snp"
+        snp_id_result = await conn.execute(text(snp_id_query))
+        snp_ids = [row[0] if not hasattr(row, 'snp_id') else row.snp_id for row in snp_id_result.fetchall()]
+        
+        # Get all beneficial ingredients
         beneficial_query = """
             SELECT s.snp_id, bi.ingredient_name, bi.ingredient_mechanism, 
                    bi.benefit_mechanism, bi.recommendation_strength, bi.evidence_level
             FROM snp s
             JOIN snp_beneficial_ingredients bi ON s.rsid = bi.rsid
-            WHERE s.snp_id = ANY(:snp_ids)
         """
         
-        # Get all cautionary ingredients in one query
+        # Get all cautionary ingredients
         caution_query = """
             SELECT sicl.snp_id, ic.ingredient_name, ic.risk_mechanism, ic.alternative_ingredients
             FROM SNP_IngredientCaution_Link sicl
             JOIN IngredientCaution ic ON sicl.caution_id = ic.caution_id
-            WHERE sicl.snp_id = ANY(:snp_ids)
         """
         
-        beneficial_result = await conn.execute(text(beneficial_query), {'snp_ids': snp_ids})
+        beneficial_result = await conn.execute(text(beneficial_query))
         beneficial_results = beneficial_result.fetchall()
         
-        caution_result = await conn.execute(text(caution_query), {'snp_ids': snp_ids})
+        caution_result = await conn.execute(text(caution_query))
         caution_results = caution_result.fetchall()
         
-        logging.info(f"Fetched {len(beneficial_results)} beneficial ingredients and {len(caution_results)} cautions")
+        logging.info(f"Fetched {len(beneficial_results)} beneficial ingredients and {len(caution_results)} cautions for cache")
         
-        # Initialize results dictionary
+        # Initialize results dictionary for all SNPs
         ingredients_by_snp = {snp_id: ([], []) for snp_id in snp_ids}
         
         # Process beneficial ingredients
@@ -218,6 +295,9 @@ class AnalysisService:
             try:
                 # Try attribute access first
                 snp_id = row.snp_id
+                if snp_id not in ingredients_by_snp:
+                    ingredients_by_snp[snp_id] = ([], [])
+                    
                 beneficial_list, _ = ingredients_by_snp[snp_id]
                 
                 beneficial_list.append({
@@ -232,6 +312,9 @@ class AnalysisService:
                 # Index positions: 0=snp_id, 1=ingredient_name, 2=ingredient_mechanism, 
                 #                  3=benefit_mechanism, 4=recommendation_strength, 5=evidence_level
                 snp_id = row[0]
+                if snp_id not in ingredients_by_snp:
+                    ingredients_by_snp[snp_id] = ([], [])
+                    
                 beneficial_list, _ = ingredients_by_snp[snp_id]
                 
                 beneficial_list.append({
@@ -247,6 +330,9 @@ class AnalysisService:
             try:
                 # Try attribute access first
                 snp_id = row.snp_id
+                if snp_id not in ingredients_by_snp:
+                    ingredients_by_snp[snp_id] = ([], [])
+                    
                 _, caution_list = ingredients_by_snp[snp_id]
                 
                 caution_list.append({
@@ -258,6 +344,9 @@ class AnalysisService:
                 # Fall back to index-based access
                 # Index positions: 0=snp_id, 1=ingredient_name, 2=risk_mechanism, 3=alternative_ingredients
                 snp_id = row[0]
+                if snp_id not in ingredients_by_snp:
+                    ingredients_by_snp[snp_id] = ([], [])
+                    
                 _, caution_list = ingredients_by_snp[snp_id]
                 
                 caution_list.append({
@@ -266,10 +355,50 @@ class AnalysisService:
                     'alternative_ingredients': row[3]
                 })
         
+        # Update the cache
+        AnalysisService._ingredients_cache = ingredients_by_snp
+        AnalysisService._ingredients_cache_timestamp = current_time
+        
+        # Log results
+        active_snps = sum(1 for snp_id, (b, c) in ingredients_by_snp.items() if b or c)
+        total_beneficial = sum(len(b) for b, _ in ingredients_by_snp.values())
+        total_cautions = sum(len(c) for _, c in ingredients_by_snp.values())
+        logger.info(f"Ingredients cache updated with {total_beneficial} beneficial and {total_cautions} cautions for {active_snps} active SNPs")
+        
+        return ingredients_by_snp
+    
+    @staticmethod
+    async def get_batch_ingredients(conn, snp_ids: List[int]) -> Dict[int, Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]]:
+        """
+        Retrieves beneficial and cautionary ingredients for multiple SNP IDs using cached data.
+        
+        Args:
+            conn: Database connection
+            snp_ids: List of SNP IDs to retrieve ingredients for
+            
+        Returns:
+            Dictionary mapping SNP IDs to tuples of (beneficial_list, caution_list)
+        """
+        if not snp_ids:
+            return {}
+        
+        logger.info(f"Looking up ingredients for {len(snp_ids)} SNPs")
+        
+        # Get the full ingredients cache
+        all_ingredients = await AnalysisService.get_all_ingredients_cached(conn)
+        
+        # Filter only the requested SNP IDs
+        ingredients_by_snp = {snp_id: ingredients for snp_id, ingredients in all_ingredients.items() if snp_id in snp_ids}
+        
+        # Ensure all requested SNP IDs are in the result even if they have no ingredients
+        for snp_id in snp_ids:
+            if snp_id not in ingredients_by_snp:
+                ingredients_by_snp[snp_id] = ([], [])
+        
         # Log results
         total_beneficial = sum(len(b) for b, _ in ingredients_by_snp.values())
         total_cautions = sum(len(c) for _, c in ingredients_by_snp.values())
-        logger.info(f"Found {total_beneficial} beneficial ingredients and {total_cautions} cautions across {len(snp_ids)} SNPs")
+        logger.info(f"Found {total_beneficial} beneficial ingredients and {total_cautions} cautions for {len(snp_ids)} SNPs in cache")
         
         return ingredients_by_snp
     

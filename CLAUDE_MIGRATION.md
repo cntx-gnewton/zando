@@ -1,4 +1,4 @@
-# Zando Genomic Analysis: FastAPI + React Migration Plan
+hases# Zando Genomic Analysis: FastAPI + React Migration Plan
 
 ## 1. Project Architecture
 

@@ -19,7 +19,7 @@ export const CACHE_EXPIRATION = 7 * 24 * 60 * 60 * 1000;
 
 // Feature flags
 export const FEATURES = {
-  USER_AUTHENTICATION: false, // Disable authentication for initial version
+  USER_AUTHENTICATION: true, // Enable authentication
   REPORT_CUSTOMIZATION: true,
   DATA_EXPORT: false,
   DETAILED_ANALYSIS: true

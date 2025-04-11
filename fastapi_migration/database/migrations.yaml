@@ -1,0 +1,28 @@
+database:
+  default_schema: public
+  migration_table: schema_migrations
+  
+components:
+  - name: types
+    order: 1
+    directory: sql/types
+    
+  - name: sequences
+    order: 2
+    directory: sql/sequences
+    
+  - name: tables
+    order: 3
+    directory: sql/tables
+    
+  - name: functions 
+    order: 4
+    directory: sql/functions
+    
+  - name: views
+    order: 5
+    directory: sql/views
+    
+  - name: config
+    order: 6
+    directory: sql/config

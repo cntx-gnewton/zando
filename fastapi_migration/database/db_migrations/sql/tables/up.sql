@@ -1,9 +1,10 @@
+-- Create all tables with IF NOT EXISTS
 
 --
 -- Name: characteristic_condition_link; Type: TABLE; Schema: public; Owner: cam
 --
 
-CREATE TABLE public.characteristic_condition_link (
+CREATE TABLE IF NOT EXISTS public.characteristic_condition_link (
     characteristic_id integer NOT NULL,
     condition_id integer NOT NULL,
     relationship_type character varying
@@ -15,7 +16,7 @@ CREATE TABLE public.characteristic_condition_link (
 -- Name: condition_ingredient_link; Type: TABLE; Schema: public; Owner: cam
 --
 
-CREATE TABLE public.condition_ingredient_link (
+CREATE TABLE IF NOT EXISTS public.condition_ingredient_link (
     condition_id integer NOT NULL,
     ingredient_id integer NOT NULL,
     recommendation_strength character varying,
@@ -29,7 +30,7 @@ CREATE TABLE public.condition_ingredient_link (
 -- Name: ingredient; Type: TABLE; Schema: public; Owner: cam
 --
 
-CREATE TABLE public.ingredient (
+CREATE TABLE IF NOT EXISTS public.ingredient (
     ingredient_id integer NOT NULL,
     name character varying NOT NULL,
     mechanism text,
@@ -44,7 +45,7 @@ CREATE TABLE public.ingredient (
 -- Name: ingredientcaution; Type: TABLE; Schema: public; Owner: cam
 --
 
-CREATE TABLE public.ingredientcaution (
+CREATE TABLE IF NOT EXISTS public.ingredientcaution (
     caution_id integer NOT NULL,
     ingredient_name character varying NOT NULL,
     category character varying NOT NULL,
@@ -59,7 +60,7 @@ CREATE TABLE public.ingredientcaution (
 -- Name: skincondition; Type: TABLE; Schema: public; Owner: cam
 --
 
-CREATE TABLE public.skincondition (
+CREATE TABLE IF NOT EXISTS public.skincondition (
     condition_id integer NOT NULL,
     name character varying NOT NULL,
     description text,
@@ -72,7 +73,7 @@ CREATE TABLE public.skincondition (
 -- Name: snp; Type: TABLE; Schema: public; Owner: cam
 --
 
-CREATE TABLE public.snp (
+CREATE TABLE IF NOT EXISTS public.snp (
     snp_id integer NOT NULL,
     rsid character varying NOT NULL,
     gene character varying NOT NULL,
@@ -89,7 +90,7 @@ CREATE TABLE public.snp (
 -- Name: snp_characteristic_link; Type: TABLE; Schema: public; Owner: cam
 --
 
-CREATE TABLE public.snp_characteristic_link (
+CREATE TABLE IF NOT EXISTS public.snp_characteristic_link (
     snp_id integer NOT NULL,
     characteristic_id integer NOT NULL,
     effect_direction character varying,
@@ -103,7 +104,7 @@ CREATE TABLE public.snp_characteristic_link (
 -- Name: snp_ingredient_link; Type: TABLE; Schema: public; Owner: cam
 --
 
-CREATE TABLE public.snp_ingredient_link (
+CREATE TABLE IF NOT EXISTS public.snp_ingredient_link (
     snp_id integer NOT NULL,
     ingredient_id integer NOT NULL,
     benefit_mechanism text,
@@ -119,7 +120,7 @@ CREATE TABLE public.snp_ingredient_link (
 -- Name: snp_ingredientcaution_link; Type: TABLE; Schema: public; Owner: cam
 --
 
-CREATE TABLE public.snp_ingredientcaution_link (
+CREATE TABLE IF NOT EXISTS public.snp_ingredientcaution_link (
     snp_id integer NOT NULL,
     caution_id integer NOT NULL,
     evidence_level character varying,
@@ -133,7 +134,7 @@ CREATE TABLE public.snp_ingredientcaution_link (
 -- Name: product; Type: TABLE; Schema: public; Owner: cam
 --
 
-CREATE TABLE public.product (
+CREATE TABLE IF NOT EXISTS public.product (
     product_id integer NOT NULL,
     name character varying NOT NULL,
     brand character varying,
@@ -150,7 +151,7 @@ CREATE TABLE public.product (
 -- Name: product_aspect; Type: TABLE; Schema: public; Owner: cam
 --
 
-CREATE TABLE public.product_aspect (
+CREATE TABLE IF NOT EXISTS public.product_aspect (
     aspect_id integer NOT NULL,
     name character varying NOT NULL,
     category character varying,
@@ -162,7 +163,7 @@ CREATE TABLE public.product_aspect (
 -- Name: product_aspect_link; Type: TABLE; Schema: public; Owner: cam
 --
 
-CREATE TABLE public.product_aspect_link (
+CREATE TABLE IF NOT EXISTS public.product_aspect_link (
     product_id integer NOT NULL,
     aspect_id integer NOT NULL
 );
@@ -173,7 +174,7 @@ CREATE TABLE public.product_aspect_link (
 -- Name: product_benefit; Type: TABLE; Schema: public; Owner: cam
 --
 
-CREATE TABLE public.product_benefit (
+CREATE TABLE IF NOT EXISTS public.product_benefit (
     benefit_id integer NOT NULL,
     name character varying NOT NULL,
     category character varying,
@@ -186,7 +187,7 @@ CREATE TABLE public.product_benefit (
 -- Name: product_benefit_link; Type: TABLE; Schema: public; Owner: cam
 --
 
-CREATE TABLE public.product_benefit_link (
+CREATE TABLE IF NOT EXISTS public.product_benefit_link (
     product_id integer NOT NULL,
     benefit_id integer NOT NULL,
     strength character varying,
@@ -199,7 +200,7 @@ CREATE TABLE public.product_benefit_link (
 -- Name: product_concern; Type: TABLE; Schema: public; Owner: cam
 --
 
-CREATE TABLE public.product_concern (
+CREATE TABLE IF NOT EXISTS public.product_concern (
     concern_id integer NOT NULL,
     name character varying NOT NULL,
     related_characteristic character varying,
@@ -210,7 +211,7 @@ CREATE TABLE public.product_concern (
 -- Name: product_concern_link; Type: TABLE; Schema: public; Owner: cam
 --
 
-CREATE TABLE public.product_concern_link (
+CREATE TABLE IF NOT EXISTS public.product_concern_link (
     product_id integer NOT NULL,
     concern_id integer NOT NULL
 );
@@ -221,7 +222,7 @@ CREATE TABLE public.product_concern_link (
 -- Name: product_ingredient_link; Type: TABLE; Schema: public; Owner: cam
 --
 
-CREATE TABLE public.product_ingredient_link (
+CREATE TABLE IF NOT EXISTS public.product_ingredient_link (
     product_id integer NOT NULL,
     ingredient_id integer NOT NULL,
     is_active boolean DEFAULT false,
@@ -233,7 +234,7 @@ CREATE TABLE public.product_ingredient_link (
 -- Name: product_routine_position; Type: TABLE; Schema: public; Owner: cam
 --
 
-CREATE TABLE public.product_routine_position (
+CREATE TABLE IF NOT EXISTS public.product_routine_position (
     position_id integer NOT NULL,
     product_id integer,
     routine_step public.routine_step_type NOT NULL,
@@ -246,7 +247,7 @@ CREATE TABLE public.product_routine_position (
 -- Name: product_genetic_suitability; Type: TABLE; Schema: public; Owner: cam
 --
 
-CREATE TABLE public.product_genetic_suitability (
+CREATE TABLE IF NOT EXISTS public.product_genetic_suitability (
     product_id integer NOT NULL,
     snp_id integer NOT NULL,
     suitability_score integer,
@@ -258,7 +259,7 @@ CREATE TABLE public.product_genetic_suitability (
 -- Name: skincharacteristic; Type: TABLE; Schema: public; Owner: cam
 --
 
-CREATE TABLE public.skincharacteristic (
+CREATE TABLE IF NOT EXISTS public.skincharacteristic (
     characteristic_id integer NOT NULL,
     name character varying NOT NULL,
     description text,
@@ -272,7 +273,7 @@ CREATE TABLE public.skincharacteristic (
 -- Name: report_log; Type: TABLE; Schema: public; Owner: cam
 --
 
-CREATE TABLE public.report_log (
+CREATE TABLE IF NOT EXISTS public.report_log (
     log_id integer NOT NULL,
     generated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     report_summary text
@@ -283,11 +284,10 @@ CREATE TABLE public.report_log (
 -- Name: report_sections; Type: TABLE; Schema: public; Owner: cam
 --
 
-CREATE TABLE public.report_sections (
+CREATE TABLE IF NOT EXISTS public.report_sections (
     section_id integer NOT NULL,
     section_name character varying NOT NULL,
     display_order integer NOT NULL,
     section_type character varying NOT NULL,
     is_active boolean DEFAULT true
 );
-

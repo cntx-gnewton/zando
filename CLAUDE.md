@@ -1,87 +1,219 @@
-# CLAUDE.md - Assistant Guide for Zando Genomic Analysis Project
+# CLAUDE.md - Guide for Zando Genomic Analysis Project
 
-## Build & Run Commands
-- Install dependencies: `pip install -r requirements.txt`
-- Run web app: `python src/app.py`
-- Process DNA file: `python src/process_dna.py <input_dna_file.txt> <output_report.pdf>`
-- Generate skin report: `python src/generate_skin_report.py <input_dna_file> <output_pdf>`
-- Validate DNA file: `python src/dna_validator.py <input_dna_file>`
-- Docker build: `docker build -t zando .`
-- Docker run: `docker run -p 8080:8080 zando`
+This document serves as a comprehensive guide to the Zando Genomic Analysis project, including both the original implementation and the new FastAPI+React architecture.
 
-## Project Architecture
+## Current Project Architecture
 
-### Frontend
-- **Web Framework**: Built with Dash/Flask for interactive web applications
-- **UI Components**: Uses dash-bootstrap-components for responsive design
-- **Core Features**:
-  - File upload interface for genomic data (.txt files)
-  - Progress indicators during processing
-  - Downloadable PDF reports
-  - Option to generate dummy reports for testing
-- **Main Files**:
-  - `ALGORYTHM/src/app.py`: Web application using Dash with file upload interface
-  - `ALGORYTHM/src/reports/`: Directory where PDF reports are stored
+Zando has been migrated from a monolithic Flask/Dash application to a modern microservices architecture with a FastAPI backend and React frontend.
 
-### Backend
-- **Core Processing Components**:
-  - DNA file parser: Extracts SNP records from 23andMe/Ancestry-style raw data files
-  - Database connector: Interfaces with PostgreSQL for genetic data lookup
-  - Analysis engine: Cross-references user SNPs with database to find matches
-  - PDF generator: Creates personalized reports using ReportLab
-- **Main Files**:
-  - `ALGORYTHM/src/process_dna.py`: Core functionality for DNA processing and report generation
-  - `ALGORYTHM/src/generate_skin_report.py`: Alternative report generator with simpler database connection
-  - `ALGORYTHM/src/dna_validator.py`: Tool for validating DNA files with detailed analysis
-  
-### Database
-- **Engine**: PostgreSQL database with custom functions for genetic analysis
-- **Schema**:
-  - `snp`: Contains genetic variants with rsID, gene, risk allele, effect, evidence strength
-  - `skincharacteristic`: Skin traits that can be affected by genetic variations
-  - `ingredientcaution`/`ingredient`: Active ingredients with benefits or cautions
-  - `snp_characteristic_link`/`snp_ingredient_link`: Association tables linking SNPs to characteristics and ingredients
-- **SQL Functions**:
-  - `generate_genetic_analysis_section`: Analyzes genetic variants
-  - `generate_summary_section`: Creates readable summaries from genetic findings
-  - `get_ingredient_recommendations`: Fetches product recommendations based on genetics
-- **Main Files**:
-  - `ALGORYTHM/database/initialize.sql`: Database schema setup
-  - `ALGORYTHM/database/populate.sql`: Populates database with genetic data
-  
-### Frontend-Backend Integration
-- **Data Flow**:
-  1. User uploads raw genetic data through web interface
-  2. Frontend streams file data to backend parser
-  3. Backend extracts SNP data and connects to database
-  4. Database queries match user SNPs with known variants
-  5. Backend processes matches to generate personalized recommendations
-  6. PDF report is generated and stored in the reports directory
-  7. Frontend provides download link for the completed report
-- **API Pattern**:
-  - Uses Flask route for file download functionality (`/download/<path:filename>`)
-  - Dash callbacks for reactive UI updates and processing flow
-- **Environment Configuration**:
-  - Uses environment variables for connection settings
-  - Debug mode toggle for development environments
-  - Cloud SQL connector for production PostgreSQL connections
+### Architecture Overview
+
+**Original Architecture:**
+```
+[Client Browser] → [Dash/Flask UI] → [Python Business Logic] → [PostgreSQL]
+```
+
+**Current Architecture:**
+```
+[React Frontend] → [FastAPI Backend] → [PostgreSQL]
+                    ↑ Deployed on Google Cloud Run
+```
+
+## Backend (FastAPI)
+
+### Core Components
+
+1. **DNA Processing Service**
+   - File validation and parsing
+   - SNP extraction and normalization
+   - Format detection for 23andMe/Ancestry data
+   - Content-based file hashing for caching
+   - Optimized for large genomic files
+
+2. **Analysis Service**
+   - Batch database operations for efficient SNP lookup
+   - Genetic trait matching with weighted evidence scoring
+   - Characteristic analysis for skin conditions
+   - Comprehensive ingredient recommendations
+   - Reference data caching for performance
+
+3. **Report Generation**
+   - Markdown-based PDF generation with ReportLab
+   - Dynamic summary creation based on genetic findings
+   - Ingredient recommendations with scientific evidence
+   - Organized sections for traits, characteristics, and recommendations
+   - Content-addressable caching system
+
+4. **API Endpoints**
+
+The backend exposes RESTful endpoints for all functionality:
+
+```
+/api/v1
+  /auth
+    - POST /login               # User authentication
+    - POST /register            # User registration
+    - GET /me                   # Get user profile
+  /dna
+    - POST /upload              # Upload DNA file
+    - GET /uploads              # List uploads with pagination
+    - GET /formats              # Get supported formats
+  /analysis
+    - POST /process             # Process DNA and get results
+    - GET /{analysis_id}        # Get analysis results
+    - GET /list                 # List analyses with pagination
+  /reports
+    - POST /generate            # Generate PDF report
+    - GET /{report_id}          # Get report metadata
+    - GET /{report_id}/download # Download report PDF
+  /cache
+    - Various endpoints for cache management
+  /admin
+    - Various endpoints for system administration
+```
+
+### Database Schema
+
+- **snp**: Genetic variants with rsID, gene, allele, effect details
+- **skincharacteristic**: Skin traits affected by genetic variations
+- **ingredientcaution/ingredient**: Beneficial and cautionary ingredients
+- **Association tables**: Link SNPs to characteristics and ingredients
+- **Efficient indexes**: Optimized for rapid genetic lookups
+
+### Performance Optimizations
+
+- **Connection Pooling**: Persistent database connections
+- **Batch Operations**: Combined queries for SNP data and characteristics
+- **Data Caching**: Multiple caching layers for each processing stage
+- **Content-addressable Storage**: Hash-based file management
+- **Asynchronous Processing**: Non-blocking database operations
+
+## Frontend (React)
+
+### Core Components
+
+1. **File Upload System**
+   - Drag-and-drop interface with progress indication
+   - File validation and format checking
+   - Error handling with user feedback
+   - Integration with backend upload API
+
+2. **Analysis Visualization**
+   - Interactive display of genetic findings
+   - Organized presentation of SNP impacts
+   - Clear visualization of characteristic effects
+   - Mobile-responsive design
+
+3. **Ingredient Recommendations**
+   - Tabbed display of beneficial and cautionary ingredients
+   - Gene-based grouping of recommendations
+   - Evidence-weighted presentation
+   - Clear scientific explanations
+
+4. **Report Management**
+   - One-click report generation
+   - PDF download functionality
+   - Report history and management
+   - Shareable report links
+
+### Frontend Structure
+
+```
+/frontend
+  /src
+    /api         # API service clients
+    /components  # React components
+    /contexts    # State management
+    /hooks       # Custom React hooks
+    /pages       # Page components
+    /types       # TypeScript definitions
+    /utils       # Utility functions
+```
+
+### Authentication
+
+The system includes JWT-based authentication with the following features:
+- Secure password hashing with bcrypt
+- Token-based authentication
+- Protected routes
+- User profile management
+- Frontend context for auth state
+
+## Development Environment
+
+### Backend Setup
+
+```bash
+# Set up backend
+cd fastapi_migration/backend
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+# Run backend server
+uvicorn main:app --reload --port 8000
+```
+
+### Frontend Setup
+
+```bash
+# Set up frontend
+cd fastapi_migration/frontend
+npm install
+
+# Run development server
+npm start
+```
+
+### Environment Variables
+
+Backend (.env):
+```
+POSTGRES_SERVER=localhost
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=zando
+SECRET_KEY=yoursecretkey
+```
+
+Frontend (.env):
+```
+REACT_APP_API_URL=http://localhost:8000/api/v1
+```
+
+## Deployment
+
+The application is designed for deployment on Google Cloud:
+
+- **Backend**: Google Cloud Run
+- **Frontend**: Google Cloud Storage with Cloud CDN
+- **Database**: Google Cloud SQL (PostgreSQL)
+- **File Storage**: Google Cloud Storage
 
 ## Code Style Guidelines
-- Use snake_case for variables, functions, and file names
-- Group imports: standard library, third-party, local modules
-- Add type hints to function signatures where possible
-- Document functions with docstrings ("""Description.""")
-- Follow PEP 8 standards for Python code
-- Use specific exception handling (avoid bare except blocks)
-- SQL: Use consistent indentation and snake_case naming
-- Keep functions focused on a single responsibility
-- Log errors with context (file, line, detailed message)
-- Use environment variables for configuration (via dotenv)
 
-## Database Interaction
-- Database initialization: Run `database/initialize.sql`
-- Database population: Run `database/populate.sql`
-- Database tests: Execute SQL in `database/_Archive/tests/`
-- Connection string format: `postgresql+pg8000://USER:PASSWORD@HOST/DATABASE`
-- Production environment uses Google Cloud SQL Connector (see `process_dna.py`)
-- Local development uses direct psycopg2/pg8000 connection
+- **Backend**:
+  - Use snake_case for Python (variables, functions, files)
+  - Add type hints to function signatures
+  - Document with docstrings
+  - Follow PEP 8 standards
+
+- **Frontend**:
+  - Use camelCase for JavaScript/TypeScript
+  - Component-focused architecture
+  - Strong TypeScript typing
+  - Consistent Tailwind CSS styling
+
+## Legacy System Reference
+
+For reference to the original system:
+
+- **Main Files**:
+  - `ALGORYTHM/src/app.py`: Original Dash application
+  - `ALGORYTHM/src/process_dna.py`: Core DNA processing
+  - `ALGORYTHM/database/`: Database schema and initialization
+
+- **Run Commands** (Legacy):
+  - Install: `pip install -r ALGORYTHM/requirements.txt`
+  - Run web app: `python ALGORYTHM/src/app.py`
+  - Process file: `python ALGORYTHM/src/process_dna.py <input> <output>`

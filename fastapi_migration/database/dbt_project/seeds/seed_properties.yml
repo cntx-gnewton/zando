@@ -1,0 +1,124 @@
+version: 2
+
+seeds:
+  - name: snps
+    description: "Genetic variants data"
+    columns:
+      - name: rsid
+        description: "Reference SNP ID"
+      - name: gene
+        description: "Gene name"
+      - name: risk_allele
+        description: "Risk allele"
+      - name: effect
+        description: "Effect description"
+      - name: evidence_strength
+        description: "Strength of evidence"
+      - name: category
+        description: "Category of the SNP"
+    
+  - name: skin_characteristics
+    description: "Skin characteristics data"
+    columns:
+      - name: name
+        description: "Characteristic name"
+      - name: description
+        description: "Detailed description"
+      - name: measurement_method
+        description: "Method for measuring this characteristic"
+    
+  - name: skin_conditions
+    description: "Skin conditions data"
+    columns:
+      - name: name
+        description: "Condition name"
+      - name: description
+        description: "Detailed description"
+      - name: severity_scale
+        description: "Scale for measuring severity"
+    
+  - name: ingredients
+    description: "Beneficial ingredients data"
+    columns:
+      - name: name
+        description: "Ingredient name"
+      - name: mechanism
+        description: "Mechanism of action"
+      - name: evidence_level
+        description: "Level of scientific evidence"
+      - name: contraindications
+        description: "Known contraindications"
+    
+  - name: ingredient_cautions
+    description: "Ingredients to avoid data"
+    columns:
+      - name: ingredient_name
+        description: "Name of the ingredient"
+      - name: category
+        description: "Category (Avoid or Use with Caution)"
+      - name: risk_mechanism
+        description: "Mechanism of risk"
+      - name: affected_characteristic
+        description: "Affected skin characteristic"
+      - name: alternative_ingredients
+        description: "Alternative ingredients to use instead"
+    
+  - name: snp_characteristic_links
+    description: "Links between SNPs and skin characteristics"
+    columns:
+      - name: rsid
+        description: "Reference SNP ID"
+      - name: characteristic_name
+        description: "Characteristic name"
+      - name: effect_direction
+        description: "Direction of the effect"
+      - name: evidence_strength
+        description: "Strength of evidence"
+    
+  - name: characteristic_condition_links
+    description: "Links between characteristics and conditions"
+    columns:
+      - name: characteristic_name
+        description: "Characteristic name"
+      - name: condition_name
+        description: "Condition name"
+      - name: relationship_type
+        description: "Type of relationship"
+    
+  - name: condition_ingredient_links
+    description: "Links between conditions and recommended ingredients"
+    columns:
+      - name: condition_name
+        description: "Condition name"
+      - name: ingredient_name
+        description: "Ingredient name"
+      - name: recommendation_strength
+        description: "Strength of recommendation"
+      - name: guidance_notes
+        description: "Usage guidance notes"
+    
+  - name: snp_ingredient_links
+    description: "Links between SNPs and beneficial ingredients"
+    columns:
+      - name: rsid
+        description: "Reference SNP ID"
+      - name: ingredient_name
+        description: "Ingredient name"
+      - name: benefit_mechanism
+        description: "Mechanism of benefit"
+      - name: recommendation_strength
+        description: "Strength of recommendation"
+      - name: evidence_level
+        description: "Level of scientific evidence"
+    
+  - name: snp_ingredient_caution_links
+    description: "Links between SNPs and ingredients to avoid"
+    columns:
+      - name: rsid
+        description: "Reference SNP ID"
+      - name: caution_ingredient_name
+        description: "Ingredient name to avoid"
+      - name: evidence_level
+        description: "Level of scientific evidence"
+      - name: notes
+        description: "Additional notes"

@@ -1,0 +1,32 @@
+# Database Configuration
+
+development:
+  # For local testing without Cloud SQL connection
+  host: "localhost"
+  port: 5432
+  database: "zando_dev"
+  user: "greysonnewton"
+  password: ""
+  
+cloud:
+  # Google Cloud SQL connection
+  instance_connection_name: "zerosandones-369:us-central1:zando-dev"
+  host: ""  # Not used with Cloud SQL
+  port: 5432  # Standard PostgreSQL port
+  database: "postgres"
+  user: "postgres"
+  password: "postgres"
+  
+test:
+  host: localhost
+  port: 5432
+  database: zando_test
+  user: zando_user
+  password: test_password
+  
+production:
+  host: ${DB_HOST}
+  port: ${DB_PORT}
+  database: ${DB_NAME}
+  user: ${DB_USER}
+  password: ${DB_PASSWORD}

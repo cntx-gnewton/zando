@@ -50,7 +50,7 @@ async def check_cache_status():
                     AnalysisService._ingredients_cache_timestamp
                 ])) if any([AnalysisService._snp_cache_timestamp, 
                           AnalysisService._characteristics_cache_timestamp,
-                          AnalysisService._ingredients_cache_timestamp]) else current_time)
+                          AnalysisService._ingredients_cache_timestamp]) else current_time))
         },
         "caches": {
             "snp": {

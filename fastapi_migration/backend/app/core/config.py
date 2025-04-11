@@ -39,7 +39,11 @@ class Settings(BaseSettings):
             f"{values.data.get('POSTGRES_PORT')}/"
             f"{values.data.get('POSTGRES_DB')}"
         )
-    
+    # Cloud
+    DB_USER: str = os.getenv("DB_USER", "postgres")
+    DB_PASS: str = os.getenv("DB_PASS", "postgres")
+    DB_NAME: str = os.getenv("DB_NAME", "postgres")
+    INSTANCE_CONNECTION_NAME: str = os.getenv("INSTANCE_CONNECTION_NAME", "")
     # Security settings
     SECRET_KEY: str = os.getenv("SECRET_KEY", "supersecretkey")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
@@ -61,7 +65,7 @@ class Settings(BaseSettings):
 
 # Create settings instance
 settings = Settings()
-
+print(f"Loaded settings: {settings}")
 # Ensure directories exist
 os.makedirs(settings.CACHE_DIR, exist_ok=True)
 os.makedirs(settings.REPORTS_DIR, exist_ok=True)

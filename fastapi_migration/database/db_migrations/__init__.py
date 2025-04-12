@@ -7,5 +7,5 @@ for the Zando genomic analysis project.
 
 __version__ = "0.1.0"
 
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()

@@ -30,6 +30,10 @@ RUN poetry config virtualenvs.create false \
 # Copy application code
 COPY . .
 
+# Create data and sql directories and set them as volumes
+RUN mkdir -p /app/data /app/sql
+VOLUME ["/app/data", "/app/sql"]
+
 # Set entry point
 ENTRYPOINT ["python", "-m", "db_migrations.cli"]
 

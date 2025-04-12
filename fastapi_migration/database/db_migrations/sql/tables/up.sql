@@ -291,3 +291,5 @@ CREATE TABLE IF NOT EXISTS public.report_sections (
     section_type character varying NOT NULL,
     is_active boolean DEFAULT true
 );
+
+

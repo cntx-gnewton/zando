@@ -4,7 +4,21 @@ import yaml
 import sqlalchemy
 from typing import List, Dict, Optional, Union, Any
 from datetime import datetime
-from db_migrations.utils.data_loader import DataLoader
+
+# Handle different import scenarios
+try:
+    # Try importing as a package first
+    from db_migrations.utils.data_loader import DataLoader
+except (ModuleNotFoundError, ImportError):
+    # Fall back to relative imports if running directly
+    try:
+        from ..utils.data_loader import DataLoader
+    except (ImportError, ValueError):
+        # Absolute import as last resort
+        import sys
+        import os
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+        from utils.data_loader import DataLoader
 
 # Configure logging
 logger = logging.getLogger("migration_manager")

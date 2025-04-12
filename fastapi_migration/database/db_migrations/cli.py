@@ -4,8 +4,16 @@ import sys
 import argparse
 import logging
 import yaml
-from db_migrations.core.manager import SqlMigrationManager
-from db_migrations.utils.db_session import create_db_engine, create_session_factory
+
+# Handle different import scenarios
+try:
+    # Try importing as a package first
+    from db_migrations.core.manager import SqlMigrationManager
+    from db_migrations.utils.db_session import create_db_engine, create_session_factory
+except ModuleNotFoundError:
+    # Fall back to relative imports if running directly
+    from core.manager import SqlMigrationManager
+    from utils.db_session import create_db_engine, create_session_factory
 
 # Configure logging
 logging.basicConfig(

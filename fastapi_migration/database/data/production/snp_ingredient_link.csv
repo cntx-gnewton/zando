@@ -1,34 +1,52 @@
-characteristic_id,condition_id,relationship_type
-48,40,Primary
-49,40,Primary
-48,41,Primary
-49,41,Primary
-46,42,Primary
-46,43,Primary
-47,43,Primary
-54,43,Primary
-50,44,Primary
-50,45,Primary
-56,45,Primary
-50,46,Primary
-51,46,Primary
-47,47,Primary
-52,47,Primary
-54,47,Primary
-52,48,Primary
-53,48,Primary
-48,49,Primary
-50,49,Primary
-51,49,Primary
-59,49,Primary
-59,50,Primary
-56,51,Primary
-57,51,Primary
-56,52,Primary
-57,52,Primary
-50,42,Secondary
-54,42,Secondary
-48,44,Secondary
-48,45,Secondary
-50,48,Secondary
-54,48,Secondary
+snp_id,ingredient_id,benefit_mechanism,recommendation_strength,evidence_level,narrative
+102,77,Supports melanin regulation and UV protection,First-line,Strong,Vitamin C can help brighten and reduce uneven pigmentation linked to MC1R/TYR variants.
+101,77,Supports melanin regulation and UV protection,First-line,Strong,Vitamin C can help brighten and reduce uneven pigmentation linked to MC1R/TYR variants.
+103,77,Supports melanin regulation and UV protection,First-line,Strong,Vitamin C can help brighten and reduce uneven pigmentation linked to MC1R/TYR variants.
+102,75,Supports melanin regulation and UV protection,First-line,Strong,"Niacinamide reduces the appearance of hyperpigmentation, which MC1R/TYR variants may experience."
+103,75,Supports melanin regulation and UV protection,First-line,Strong,"Niacinamide reduces the appearance of hyperpigmentation, which MC1R/TYR variants may experience."
+101,75,Supports melanin regulation and UV protection,First-line,Strong,"Niacinamide reduces the appearance of hyperpigmentation, which MC1R/TYR variants may experience."
+101,87,Supports melanin regulation and UV protection,First-line,Strong,"Arbutin inhibits tyrosinase to address MC1R/TYR-driven excess pigment, evening skin tone."
+103,87,Supports melanin regulation and UV protection,First-line,Strong,"Arbutin inhibits tyrosinase to address MC1R/TYR-driven excess pigment, evening skin tone."
+102,87,Supports melanin regulation and UV protection,First-line,Strong,"Arbutin inhibits tyrosinase to address MC1R/TYR-driven excess pigment, evening skin tone."
+101,88,Supports melanin regulation and UV protection,First-line,Strong,Tranexamic Acid helps lighten dark spots and reduces overactive melanin from MC1R/TYR SNPs.
+103,88,Supports melanin regulation and UV protection,First-line,Strong,Tranexamic Acid helps lighten dark spots and reduces overactive melanin from MC1R/TYR SNPs.
+102,88,Supports melanin regulation and UV protection,First-line,Strong,Tranexamic Acid helps lighten dark spots and reduces overactive melanin from MC1R/TYR SNPs.
+103,90,Supports melanin regulation and UV protection,First-line,Strong,Zinc Oxide provides UV defense crucial for MC1R/TYR variants prone to sun-induced hyperpigmentation.
+102,90,Supports melanin regulation and UV protection,First-line,Strong,Zinc Oxide provides UV defense crucial for MC1R/TYR variants prone to sun-induced hyperpigmentation.
+101,90,Supports melanin regulation and UV protection,First-line,Strong,Zinc Oxide provides UV defense crucial for MC1R/TYR variants prone to sun-induced hyperpigmentation.
+105,73,Strengthens barrier function and hydration,First-line,Strong,"Ceramides restore lipids missing in FLG-deficient skin, improving dryness and barrier strength."
+105,74,Strengthens barrier function and hydration,First-line,Strong,Hyaluronic Acid boosts moisture retention for FLG-compromised barrier function.
+105,76,Strengthens barrier function and hydration,First-line,Strong,"Squalane mimics natural skin oils, helping FLG variants retain hydration and elasticity."
+105,91,Strengthens barrier function and hydration,First-line,Strong,Colloidal Oatmeal reduces dryness and irritation for FLG variants with weakened barriers.
+105,95,Strengthens barrier function and hydration,First-line,Strong,"Polyglutamic Acid locks water into FLG-impaired skin, supporting a healthier moisture balance."
+106,75,Reduces inflammation and soothes skin,First-line,Strong,Niacinamide helps calm cytokine-related redness and irritation in IL6/TNF-α variants.
+108,75,Reduces inflammation and soothes skin,First-line,Strong,Niacinamide helps calm cytokine-related redness and irritation in IL6/TNF-α variants.
+107,75,Reduces inflammation and soothes skin,First-line,Strong,Niacinamide helps calm cytokine-related redness and irritation in IL6/TNF-α variants.
+106,89,Reduces inflammation and soothes skin,First-line,Strong,"Centella Asiatica soothes inflamed skin, beneficial for IL6/TNF-α-driven overreaction."
+108,89,Reduces inflammation and soothes skin,First-line,Strong,"Centella Asiatica soothes inflamed skin, beneficial for IL6/TNF-α-driven overreaction."
+107,89,Reduces inflammation and soothes skin,First-line,Strong,"Centella Asiatica soothes inflamed skin, beneficial for IL6/TNF-α-driven overreaction."
+108,90,Reduces inflammation and soothes skin,First-line,Strong,Zinc Oxide provides a calming effect for IL6/TNF-α inflammatory flare-ups and protects from UV.
+106,90,Reduces inflammation and soothes skin,First-line,Strong,Zinc Oxide provides a calming effect for IL6/TNF-α inflammatory flare-ups and protects from UV.
+107,90,Reduces inflammation and soothes skin,First-line,Strong,Zinc Oxide provides a calming effect for IL6/TNF-α inflammatory flare-ups and protects from UV.
+106,79,Reduces inflammation and soothes skin,First-line,Strong,Green Tea polyphenols reduce inflammatory mediators that IL6/TNF-α variants may overproduce.
+108,79,Reduces inflammation and soothes skin,First-line,Strong,Green Tea polyphenols reduce inflammatory mediators that IL6/TNF-α variants may overproduce.
+107,79,Reduces inflammation and soothes skin,First-line,Strong,Green Tea polyphenols reduce inflammatory mediators that IL6/TNF-α variants may overproduce.
+106,93,Reduces inflammation and soothes skin,First-line,Strong,Azelaic Acid helps regulate inflammation and redness common in IL6/TNF-α gene carriers.
+107,93,Reduces inflammation and soothes skin,First-line,Strong,Azelaic Acid helps regulate inflammation and redness common in IL6/TNF-α gene carriers.
+108,93,Reduces inflammation and soothes skin,First-line,Strong,Azelaic Acid helps regulate inflammation and redness common in IL6/TNF-α gene carriers.
+111,81,Supports collagen production and skin structure,Second-line,Moderate,Retinoids can reduce MMP1 collagen breakdown and boost COL1A1-driven collagen formation.
+110,81,Supports collagen production and skin structure,Second-line,Moderate,Retinoids can reduce MMP1 collagen breakdown and boost COL1A1-driven collagen formation.
+110,82,Supports collagen production and skin structure,Second-line,Moderate,"Peptides support skin’s structural proteins, offsetting MMP1’s collagen breakdown."
+111,82,Supports collagen production and skin structure,Second-line,Moderate,"Peptides support skin’s structural proteins, offsetting MMP1’s collagen breakdown."
+111,77,Supports collagen production and skin structure,Second-line,Moderate,Vitamin C defends against MMP1-induced damage and enhances COL1A1 for stronger collagen.
+110,77,Supports collagen production and skin structure,Second-line,Moderate,Vitamin C defends against MMP1-induced damage and enhances COL1A1 for stronger collagen.
+111,94,Supports collagen production and skin structure,Second-line,Moderate,"Bakuchiol gently encourages collagen renewal, helping balance MMP1/COL1A1 changes."
+110,94,Supports collagen production and skin structure,Second-line,Moderate,"Bakuchiol gently encourages collagen renewal, helping balance MMP1/COL1A1 changes."
+113,77,Provides antioxidant support,Second-line,Moderate,Vitamin C bolsters antioxidant defenses for SOD2/CAT variants vulnerable to oxidative stress.
+112,77,Provides antioxidant support,Second-line,Moderate,Vitamin C bolsters antioxidant defenses for SOD2/CAT variants vulnerable to oxidative stress.
+112,78,Provides antioxidant support,Second-line,Moderate,Vitamin E protects cell membranes from free-radical damage when SOD2/CAT pathways are taxed.
+113,78,Provides antioxidant support,Second-line,Moderate,Vitamin E protects cell membranes from free-radical damage when SOD2/CAT pathways are taxed.
+112,80,Provides antioxidant support,Second-line,Moderate,"Resveratrol partners with SOD2/CAT to neutralize excess ROS, reducing oxidative burden."
+113,80,Provides antioxidant support,Second-line,Moderate,"Resveratrol partners with SOD2/CAT to neutralize excess ROS, reducing oxidative burden."
+112,79,Provides antioxidant support,Second-line,Moderate,Green Tea’s EGCG helps offset ROS in SOD2/CAT-deficient antioxidant responses.
+113,79,Provides antioxidant support,Second-line,Moderate,Green Tea’s EGCG helps offset ROS in SOD2/CAT-deficient antioxidant responses.

@@ -88,7 +88,27 @@ class SqlMigrationManager:
             if os.path.exists(sql_file):
                 logger.info(f"Applying {component} migration from {sql_file}")
                 try:
-                    self._execute_sql_file(sql_file)
+                    if component == "types":
+                        # Handle types differently to ensure they're visible to subsequent components
+                        self._execute_types_migration(sql_file)
+                        
+                        # Force a complete connection reset to ensure the types are visible
+                        logger.info("Executing reconnection to ensure type visibility")
+                        with self.session() as session:
+                            # Query to check if the genetic_finding type is present
+                            check_query = """
+                            SELECT EXISTS (
+                                SELECT 1 FROM pg_type WHERE typname = 'genetic_finding'
+                            ) as type_exists;
+                            """
+                            result = session.execute(sqlalchemy.text(check_query)).fetchone()
+                            if not result or not result[0]:
+                                logger.warning("Type genetic_finding not found in pg_type after creation!")
+                            else:
+                                logger.info("Type genetic_finding successfully created and verified")
+                    else:
+                        self._execute_sql_file(sql_file)
+                        
                     logger.info(f"Successfully applied {component} migration")
                 except Exception as e:
                     logger.error(f"Error applying {component} migration: {str(e)}")
@@ -217,6 +237,52 @@ class SqlMigrationManager:
                 
         return success
            
+    def _execute_types_migration(self, file_path: str) -> bool:
+        """
+        Execute SQL specifically for types migrations.
+        
+        Args:
+            file_path: Path to the SQL file
+            
+        Returns:
+            True if successful
+            
+        Raises:
+            Exception if SQL execution fails
+        """
+        with open(file_path, 'r') as f:
+            sql = f.read()
+            
+        # Connect with raw connection for more direct control
+        with self.session() as session:
+            # Execute SQL statements
+            try:
+                # Execute the types creation
+                session.execute(sqlalchemy.text(sql))
+                session.commit()
+                logger.info(f"Successfully executed types creation from {file_path}")
+                
+                # Run a verification query to ensure the types are available
+                verify_query = """
+                DO $$
+                BEGIN
+                    -- Check if the type exists and is accessible
+                    ASSERT (SELECT true FROM pg_type WHERE typname = 'genetic_finding'),
+                           'Type genetic_finding does not exist in pg_type';
+                END;
+                $$;
+                """
+                
+                session.execute(sqlalchemy.text(verify_query))
+                session.commit()
+                logger.info("Type validation successful")
+                
+                return True
+            except Exception as e:
+                session.rollback()
+                logger.error(f"Error in types migration {file_path}: {str(e)}")
+                raise
+    
     def _execute_sql_file(self, file_path: str) -> bool:
         """
         Execute SQL from a file.
@@ -233,6 +299,30 @@ class SqlMigrationManager:
         with open(file_path, 'r') as f:
             sql = f.read()
             
+        # If this is a functions file, ensure the types are properly referenced
+        if "/functions/" in file_path:
+            # Add explicit check for type existence at the beginning
+            type_check = """
+            DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'genetic_finding') THEN
+                    -- Create the type as a fallback
+                    CREATE TYPE public.genetic_finding AS (
+                        rsid text,
+                        gene text,
+                        category text,
+                        evidence_strength text,
+                        effect text,
+                        characteristics text[],
+                        beneficial_ingredients text[],
+                        caution_ingredients text[]
+                    );
+                END IF;
+            END;
+            $$;
+            """
+            sql = type_check + "\n\n" + sql
+        
         with self.session() as session:
             # Execute SQL statements
             try:

@@ -197,12 +197,28 @@ BEGIN
     RETURN '<characteristics>' || result_text || '</characteristics>';
 END;
 $$;
+--
+-- DO $$
+-- BEGIN
+--     DROP TYPE IF EXISTS public.genetic_finding CASCADE;
+-- END;
+-- $$;
+-- CREATE TYPE public.genetic_finding AS (
+-- 	rsid text,
+-- 	gene text,
+-- 	category text,
+-- 	evidence_strength text,
+-- 	effect text,
+-- 	characteristics text[],
+-- 	beneficial_ingredients text[],
+-- 	caution_ingredients text[]
+-- );
 
 
 --
 -- Name: generate_genetic_analysis_section(text[]); Type: FUNCTION; Schema: public; Owner: cam
 --
---
+-- --OLD VERSION--
 -- CREATE OR REPLACE FUNCTION public.generate_genetic_analysis_section(user_rsids text[]) RETURNS text
 --     LANGUAGE plpgsql
 --     AS $$
@@ -278,24 +294,27 @@ $$;
 --     RETURN '<genetic_analysis>' || result_text || '</genetic_analysis>';
 -- END;
 -- $$;
+
+-- --NEW VERSION--
 CREATE OR REPLACE FUNCTION public.generate_genetic_analysis_section(user_variants text[])
-RETURNS TABLE(report_text text, findings genetic_finding[])
+RETURNS TABLE(report_text text, findings public.genetic_finding[])
 LANGUAGE plpgsql AS
 $function$
 DECLARE
-    analysis TEXT := E'YOUR GENETIC ANALYSIS\\n\\n';
-    all_findings genetic_finding[];
+    analysis TEXT := E'YOUR GENETIC ANALYSIS\n\n';
+    all_findings public.genetic_finding[];
     variant_record RECORD;
 BEGIN
+    -- Generate report text
     FOR variant_record IN
         SELECT * FROM format_genetic_analysis(user_variants)
     LOOP
         analysis := analysis
-                    || E'\\n=== '
+                    || E'\n=== '
                     || variant_record.section_title
-                    || E' ===\\n\\n'
+                    || E' ===\n\n'
                     || variant_record.content
-                    || E'\\n\\n';
+                    || E'\n\n';
 
         all_findings := array_append(all_findings, variant_record.variant_finding);
     END LOOP;
@@ -312,7 +331,7 @@ RETURNS TABLE(
     section_title text,
     content text,
     priority integer,
-    variant_finding genetic_finding
+    variant_finding public.genetic_finding
 )
 LANGUAGE plpgsql AS
 $function$
@@ -368,11 +387,11 @@ $function$;
 -- Name: get_genetic_findings(text); Type: FUNCTION; Schema: public; Owner: cam
 --
 CREATE OR REPLACE FUNCTION public.get_genetic_findings(variant_rsid text)
-RETURNS genetic_finding
+RETURNS public.genetic_finding
 LANGUAGE plpgsql AS
 $function$
 DECLARE
-    finding genetic_finding;
+    finding public.genetic_finding;
 BEGIN
     -- Get basic variant info
     SELECT
@@ -405,11 +424,11 @@ END;
 $function$;
 
 --
--- Name: generate_summary_section(text[],genetic_finding[]); Type: FUNCTION; Schema: public; Owner: cam
+-- Name: generate_summary_section(text[],public.genetic_finding[]); Type: FUNCTION; Schema: public; Owner: cam
 --
 CREATE OR REPLACE FUNCTION public.generate_summary_section(
     user_variants text[],
-    genetic_data genetic_finding[] DEFAULT NULL::genetic_finding[]
+    genetic_data public.genetic_finding[] DEFAULT NULL::public.genetic_finding[]
 )
 RETURNS text
 LANGUAGE plpgsql AS
@@ -516,7 +535,7 @@ DECLARE
 BEGIN
     -- Generate beneficial ingredients section
     FOR beneficial_record IN (
-        SELECT 
+        SELECT
             i.name as ingredient_name,
             sil.benefit_mechanism,
             sil.recommendation_strength,
@@ -526,7 +545,7 @@ BEGIN
         JOIN ingredient i ON sil.ingredient_id = i.ingredient_id
         WHERE s.rsid = ANY(user_rsids)
         GROUP BY i.name, sil.benefit_mechanism, sil.recommendation_strength
-        ORDER BY 
+        ORDER BY
             CASE
                 WHEN sil.recommendation_strength = 'First-line' THEN 1
                 WHEN sil.recommendation_strength = 'Second-line' THEN 2
@@ -540,10 +559,10 @@ BEGIN
         beneficial_text := beneficial_text || '<genes>' || beneficial_record.genes || '</genes>';
         beneficial_text := beneficial_text || '</ingredient>';
     END LOOP;
-    
+
     -- Generate caution ingredients section
     FOR caution_record IN (
-        SELECT 
+        SELECT
             ic.ingredient_name,
             ic.risk_mechanism,
             ic.category,
@@ -561,20 +580,20 @@ BEGIN
         caution_text := caution_text || '<risk>' || caution_record.risk_mechanism || '</risk>';
         caution_text := caution_text || '<category>' || caution_record.category || '</category>';
         caution_text := caution_text || '<genes>' || caution_record.genes || '</genes>';
-        
+
         IF caution_record.alternative_ingredients IS NOT NULL THEN
             caution_text := caution_text || '<alternatives>' || caution_record.alternative_ingredients || '</alternatives>';
         END IF;
-        
+
         caution_text := caution_text || '</ingredient>';
     END LOOP;
-    
+
     -- Combine both sections
     result_text := '<ingredient_recommendations>';
     result_text := result_text || '<beneficial>' || beneficial_text || '</beneficial>';
     result_text := result_text || '<cautions>' || caution_text || '</cautions>';
     result_text := result_text || '</ingredient_recommendations>';
-    
+
     RETURN result_text;
 END;
 $$;
@@ -583,91 +602,91 @@ $$;
 --
 -- Name: generate_summary_section(text[]); Type: FUNCTION; Schema: public; Owner: cam
 --
-
-CREATE OR REPLACE FUNCTION public.generate_summary_section(user_rsids text[]) RETURNS text
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-    result_text text;
-    gene_count integer;
-    primary_genes text[];
-    characteristic_count integer;
-    top_characteristics text[];
-    beneficial_count integer;
-    caution_count integer;
-BEGIN
-    -- Get gene statistics
-    SELECT 
-        COUNT(DISTINCT s.gene), 
-        ARRAY_AGG(DISTINCT s.gene ORDER BY s.evidence_strength)
-    INTO gene_count, primary_genes
-    FROM snp s
-    WHERE s.rsid = ANY(user_rsids)
-    AND s.evidence_strength IN ('Strong', 'Moderate');
-    
-    IF gene_count > 3 THEN
-        primary_genes := primary_genes[1:3];
-    END IF;
-    
-    -- Get characteristic statistics
-    SELECT 
-        COUNT(DISTINCT sc.characteristic_id),
-        ARRAY_AGG(DISTINCT sc.name)
-    INTO characteristic_count, top_characteristics
-    FROM snp s
-    JOIN snp_characteristic_link scl ON s.snp_id = scl.snp_id
-    JOIN skincharacteristic sc ON scl.characteristic_id = sc.characteristic_id
-    WHERE s.rsid = ANY(user_rsids)
-    AND s.evidence_strength IN ('Strong', 'Moderate');
-    
-    IF characteristic_count > 3 THEN
-        top_characteristics := top_characteristics[1:3];
-    END IF;
-    
-    -- Get ingredient recommendation counts
-    SELECT COUNT(DISTINCT i.ingredient_id)
-    INTO beneficial_count
-    FROM snp s
-    JOIN snp_ingredient_link sil ON s.snp_id = sil.snp_id
-    JOIN ingredient i ON sil.ingredient_id = i.ingredient_id
-    WHERE s.rsid = ANY(user_rsids);
-    
-    SELECT COUNT(DISTINCT ic.caution_id)
-    INTO caution_count
-    FROM snp s
-    JOIN snp_ingredientcaution_link sicl ON s.snp_id = sicl.snp_id
-    JOIN ingredientcaution ic ON sicl.caution_id = ic.caution_id
-    WHERE s.rsid = ANY(user_rsids);
-    
-    -- Generate summary text
-    result_text := '<summary>';
-    
-    -- Genes summary
-    result_text := result_text || '<gene_count>' || gene_count || '</gene_count>';
-    result_text := result_text || '<primary_genes>';
-    IF array_length(primary_genes, 1) > 0 THEN
-        FOR i IN 1..array_length(primary_genes, 1) LOOP
-            result_text := result_text || '<gene>' || primary_genes[i] || '</gene>';
-        END LOOP;
-    END IF;
-    result_text := result_text || '</primary_genes>';
-    
-    -- Characteristics summary
-    result_text := result_text || '<characteristic_count>' || characteristic_count || '</characteristic_count>';
-    result_text := result_text || '<primary_characteristics>';
-    IF array_length(top_characteristics, 1) > 0 THEN
-        FOR i IN 1..array_length(top_characteristics, 1) LOOP
-            result_text := result_text || '<characteristic>' || top_characteristics[i] || '</characteristic>';
-        END LOOP;
-    END IF;
-    result_text := result_text || '</primary_characteristics>';
-    
-    -- Ingredient recommendations summary
-    result_text := result_text || '<beneficial_count>' || beneficial_count || '</beneficial_count>';
-    result_text := result_text || '<caution_count>' || caution_count || '</caution_count>';
-    
-    result_text := result_text || '</summary>';
-    
-    RETURN result_text;
-END;
-$$;
+--
+-- CREATE OR REPLACE FUNCTION public.generate_summary_section(user_rsids text[]) RETURNS text
+--     LANGUAGE plpgsql
+--     AS $$
+-- DECLARE
+--     result_text text;
+--     gene_count integer;
+--     primary_genes text[];
+--     characteristic_count integer;
+--     top_characteristics text[];
+--     beneficial_count integer;
+--     caution_count integer;
+-- BEGIN
+--     -- Get gene statistics
+--     SELECT
+--         COUNT(DISTINCT s.gene),
+--         ARRAY_AGG(DISTINCT s.gene ORDER BY s.evidence_strength)
+--     INTO gene_count, primary_genes
+--     FROM snp s
+--     WHERE s.rsid = ANY(user_rsids)
+--     AND s.evidence_strength IN ('Strong', 'Moderate');
+--
+--     IF gene_count > 3 THEN
+--         primary_genes := primary_genes[1:3];
+--     END IF;
+--
+--     -- Get characteristic statistics
+--     SELECT
+--         COUNT(DISTINCT sc.characteristic_id),
+--         ARRAY_AGG(DISTINCT sc.name)
+--     INTO characteristic_count, top_characteristics
+--     FROM snp s
+--     JOIN snp_characteristic_link scl ON s.snp_id = scl.snp_id
+--     JOIN skincharacteristic sc ON scl.characteristic_id = sc.characteristic_id
+--     WHERE s.rsid = ANY(user_rsids)
+--     AND s.evidence_strength IN ('Strong', 'Moderate');
+--
+--     IF characteristic_count > 3 THEN
+--         top_characteristics := top_characteristics[1:3];
+--     END IF;
+--
+--     -- Get ingredient recommendation counts
+--     SELECT COUNT(DISTINCT i.ingredient_id)
+--     INTO beneficial_count
+--     FROM snp s
+--     JOIN snp_ingredient_link sil ON s.snp_id = sil.snp_id
+--     JOIN ingredient i ON sil.ingredient_id = i.ingredient_id
+--     WHERE s.rsid = ANY(user_rsids);
+--
+--     SELECT COUNT(DISTINCT ic.caution_id)
+--     INTO caution_count
+--     FROM snp s
+--     JOIN snp_ingredientcaution_link sicl ON s.snp_id = sicl.snp_id
+--     JOIN ingredientcaution ic ON sicl.caution_id = ic.caution_id
+--     WHERE s.rsid = ANY(user_rsids);
+--
+--     -- Generate summary text
+--     result_text := '<summary>';
+--
+--     -- Genes summary
+--     result_text := result_text || '<gene_count>' || gene_count || '</gene_count>';
+--     result_text := result_text || '<primary_genes>';
+--     IF array_length(primary_genes, 1) > 0 THEN
+--         FOR i IN 1..array_length(primary_genes, 1) LOOP
+--             result_text := result_text || '<gene>' || primary_genes[i] || '</gene>';
+--         END LOOP;
+--     END IF;
+--     result_text := result_text || '</primary_genes>';
+--
+--     -- Characteristics summary
+--     result_text := result_text || '<characteristic_count>' || characteristic_count || '</characteristic_count>';
+--     result_text := result_text || '<primary_characteristics>';
+--     IF array_length(top_characteristics, 1) > 0 THEN
+--         FOR i IN 1..array_length(top_characteristics, 1) LOOP
+--             result_text := result_text || '<characteristic>' || top_characteristics[i] || '</characteristic>';
+--         END LOOP;
+--     END IF;
+--     result_text := result_text || '</primary_characteristics>';
+--
+--     -- Ingredient recommendations summary
+--     result_text := result_text || '<beneficial_count>' || beneficial_count || '</beneficial_count>';
+--     result_text := result_text || '<caution_count>' || caution_count || '</caution_count>';
+--
+--     result_text := result_text || '</summary>';
+--
+--     RETURN result_text;
+-- END;
+-- $$;

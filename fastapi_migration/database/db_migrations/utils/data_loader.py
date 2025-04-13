@@ -2,6 +2,8 @@ import os
 import csv
 import logging
 import sqlalchemy
+from sqlalchemy.dialects.postgresql import insert
+
 from typing import Dict, List, Any, Optional
 from pathlib import Path
 
@@ -178,7 +180,7 @@ class DataLoader:
                 table = sqlalchemy.Table(table_name, metadata, autoload_with=session.bind)
                 
                 # Create insert statement
-                stmt = sqlalchemy.insert(table).values(records)
+                stmt = insert(table).values(records)
                 
                 # Use on conflict do nothing to handle duplicates gracefully
                 stmt = stmt.on_conflict_do_nothing()
@@ -190,5 +192,5 @@ class DataLoader:
                 return True
             except Exception as e:
                 session.rollback()
-                logger.error(f"Error inserting data into {table_name}: {str(e)}")
+                logger.error(f"Error inserting data into {table_name}: {e}")
                 raise

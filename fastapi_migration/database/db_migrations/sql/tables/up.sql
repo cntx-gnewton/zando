@@ -1,5 +1,6 @@
 -- Create all tables with IF NOT EXISTS
 
+
 --
 -- Name: characteristic_condition_link; Type: TABLE; Schema: public; Owner: cam
 --

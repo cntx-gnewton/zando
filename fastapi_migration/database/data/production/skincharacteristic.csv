@@ -1,34 +1,16 @@
-characteristic_id,condition_id,relationship_type
-48,40,Primary
-49,40,Primary
-48,41,Primary
-49,41,Primary
-46,42,Primary
-46,43,Primary
-47,43,Primary
-54,43,Primary
-50,44,Primary
-50,45,Primary
-56,45,Primary
-50,46,Primary
-51,46,Primary
-47,47,Primary
-52,47,Primary
-54,47,Primary
-52,48,Primary
-53,48,Primary
-48,49,Primary
-50,49,Primary
-51,49,Primary
-59,49,Primary
-59,50,Primary
-56,51,Primary
-57,51,Primary
-56,52,Primary
-57,52,Primary
-50,42,Secondary
-54,42,Secondary
-48,44,Secondary
-48,45,Secondary
-50,48,Secondary
-54,48,Secondary
+characteristic_id,name,description,measurement_method
+61,Melanin Production,Ability to produce and distribute melanin pigment in response to UV exposure,Spectrophotometry and colorimetry measurements
+62,UV Sensitivity,Susceptibility to UV-induced damage and sunburn,Minimal Erythema Dose (MED) testing
+63,Barrier Function,Skin's ability to retain moisture and protect against environmental stressors,Trans-epidermal water loss (TEWL) measurements
+64,Hydration Level,Moisture content in the stratum corneum,Corneometry measurements
+65,Inflammatory Response,Tendency to develop inflammatory reactions in the skin,Clinical assessment and biomarker analysis
+66,Immune Activity,Immune system activity in the skin,Cytokine level measurements
+67,Collagen Production,Rate of new collagen synthesis,Biopsy analysis and ultrasound measurement
+68,Elastin Quality,Skin elasticity and recoil capacity,Cutometry measurements
+69,Antioxidant Capacity,Ability to neutralize free radicals and oxidative stress,Free radical testing and antioxidant assays
+70,DNA Repair Capacity,Efficiency of repairing UV-induced DNA damage,Comet assay and DNA damage markers
+71,Vascular Reactivity,Blood vessel response to stimuli and tendency for flushing,Laser Doppler flowmetry
+72,Microcirculation,Quality of blood flow in small skin vessels,Capillary microscopy
+73,Sebum Production,Rate and quality of natural oil production,Sebumeter measurements
+74,Product Sensitivity,Tendency to react to skincare ingredients,Patch testing and reactivity assessment
+75,Circadian Rhythm Response,Skin's daily biological rhythm patterns,Time-dependent barrier function measurements

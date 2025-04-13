@@ -1,21 +1,13 @@
 -- Drop types if they exist
 DO $$
 BEGIN
-    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'genetic_finding') THEN
-        DROP TYPE public.genetic_finding CASCADE;
-    END IF;
-    
-    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'pdf_style') THEN
-        DROP TYPE public.pdf_style CASCADE;
-    END IF;
-    
-    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'routine_step_type') THEN
-        DROP TYPE public.routine_step_type CASCADE;
-    END IF;
-END
+    DROP TYPE IF EXISTS public.genetic_finding CASCADE;
+    DROP TYPE IF EXISTS public.pdf_style CASCADE;
+    DROP TYPE IF EXISTS public.routine_step_type CASCADE;
+END;
 $$;
 
--- Create types
+-- Create types with explicit schema qualification
 CREATE TYPE public.genetic_finding AS (
 	rsid text,
 	gene text,
@@ -26,6 +18,15 @@ CREATE TYPE public.genetic_finding AS (
 	beneficial_ingredients text[],
 	caution_ingredients text[]
 );
+
+-- Force visibility of the type with a sanity check
+DO $$
+BEGIN
+    -- Verify type exists
+    ASSERT (SELECT true FROM pg_type WHERE typname = 'genetic_finding'), 
+           'Type genetic_finding was not created properly';
+END;
+$$;
 
 --
 -- Name: pdf_style; Type: TYPE; Schema: public; Owner: cam

@@ -43,16 +43,16 @@ class DataLoader:
         
         # Define the order of tables to load data into for proper referential integrity
         table_order = [
-            "snps.csv:snp",
-            "characteristics.csv:skincharacteristic",
-            "relationships/snp_characteristic.csv:snp_characteristic_link",
-            "skin_conditions.csv:skincondition",
-            "relationships/characteristic_condition.csv:characteristic_condition_link",
-            "ingredients.csv:ingredient",
-            "ingredient_cautions.csv:ingredientcaution",
-            "relationships/snp_ingredient.csv:snp_ingredient_link",
-            "relationships/snp_ingredientcaution.csv:snp_ingredientcaution_link",
-            "relationships/condition_ingredient.csv:condition_ingredient_link"
+            "snp.csv:snp",
+            "skincharacteristic.csv:skincharacteristic",
+            "snp_characteristic_link.csv:snp_characteristic_link",
+            "skincondition.csv:skincondition",
+            "characteristic_condition_link.csv:characteristic_condition_link",
+            "ingredient.csv:ingredient",
+            "ingredientcaution.csv:ingredientcaution",
+            "snp_ingredient_link.csv:snp_ingredient_link",
+            "snp_ingredientcaution_link.csv:snp_ingredientcaution_link",
+            "condition_ingredient_link.csv:condition_ingredient_link"
         ]
         
         success = True

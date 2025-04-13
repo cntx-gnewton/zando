@@ -19,7 +19,7 @@ development:
 # Production configuration for Google Cloud SQL
 production:
   use_gcp: true
-  instance_connection_name: "zerosandones-369:us-central1:zando-dev"
+  instance_connection_name: "zerosandones-369:us-east1:zando-sql"
   user: "postgres"
   password: "postgres"
   database: "postgres"

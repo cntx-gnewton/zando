@@ -202,88 +202,308 @@ $$;
 --
 -- Name: generate_genetic_analysis_section(text[]); Type: FUNCTION; Schema: public; Owner: cam
 --
-
-CREATE OR REPLACE FUNCTION public.generate_genetic_analysis_section(user_rsids text[]) RETURNS text
-    LANGUAGE plpgsql
-    AS $$
+--
+-- CREATE OR REPLACE FUNCTION public.generate_genetic_analysis_section(user_rsids text[]) RETURNS text
+--     LANGUAGE plpgsql
+--     AS $$
+-- DECLARE
+--     result_text text := '';
+--     gene_record record;
+-- BEGIN
+--     FOR gene_record IN (
+--         SELECT
+--             s.gene,
+--             s.category,
+--             s.evidence_strength,
+--             array_agg(distinct sc.name) as characteristics,
+--             array_agg(distinct i.name) as beneficial_ingredients,
+--             array_agg(distinct ic.ingredient_name) as caution_ingredients
+--         FROM snp s
+--         LEFT JOIN snp_characteristic_link scl ON s.snp_id = scl.snp_id
+--         LEFT JOIN skincharacteristic sc ON scl.characteristic_id = sc.characteristic_id
+--         LEFT JOIN snp_ingredient_link sil ON s.snp_id = sil.snp_id
+--         LEFT JOIN ingredient i ON sil.ingredient_id = i.ingredient_id
+--         LEFT JOIN snp_ingredientcaution_link sicl ON s.snp_id = sicl.snp_id
+--         LEFT JOIN ingredientcaution ic ON sicl.caution_id = ic.caution_id
+--         WHERE s.rsid = ANY(user_rsids)
+--         GROUP BY s.gene, s.category, s.evidence_strength
+--         ORDER BY
+--             CASE
+--                 WHEN s.evidence_strength = 'Strong' THEN 1
+--                 WHEN s.evidence_strength = 'Moderate' THEN 2
+--                 ELSE 3
+--             END
+--     ) LOOP
+--         result_text := result_text || '<gene>';
+--         result_text := result_text || '<name>' || gene_record.gene || '</name>';
+--         result_text := result_text || '<category>' || gene_record.category || '</category>';
+--         result_text := result_text || '<evidence>' || gene_record.evidence_strength || '</evidence>';
+--
+--         -- Add characteristics if they exist
+--         IF gene_record.characteristics IS NOT NULL AND gene_record.characteristics[1] IS NOT NULL THEN
+--             result_text := result_text || '<characteristics>';
+--             FOR i IN 1..array_length(gene_record.characteristics, 1) LOOP
+--                 IF gene_record.characteristics[i] IS NOT NULL THEN
+--                     result_text := result_text || '<characteristic>' || gene_record.characteristics[i] || '</characteristic>';
+--                 END IF;
+--             END LOOP;
+--             result_text := result_text || '</characteristics>';
+--         END IF;
+--
+--         -- Add beneficial ingredients if they exist
+--         IF gene_record.beneficial_ingredients IS NOT NULL AND gene_record.beneficial_ingredients[1] IS NOT NULL THEN
+--             result_text := result_text || '<beneficial_ingredients>';
+--             FOR i IN 1..array_length(gene_record.beneficial_ingredients, 1) LOOP
+--                 IF gene_record.beneficial_ingredients[i] IS NOT NULL THEN
+--                     result_text := result_text || '<ingredient>' || gene_record.beneficial_ingredients[i] || '</ingredient>';
+--                 END IF;
+--             END LOOP;
+--             result_text := result_text || '</beneficial_ingredients>';
+--         END IF;
+--
+--         -- Add caution ingredients if they exist
+--         IF gene_record.caution_ingredients IS NOT NULL AND gene_record.caution_ingredients[1] IS NOT NULL THEN
+--             result_text := result_text || '<caution_ingredients>';
+--             FOR i IN 1..array_length(gene_record.caution_ingredients, 1) LOOP
+--                 IF gene_record.caution_ingredients[i] IS NOT NULL THEN
+--                     result_text := result_text || '<ingredient>' || gene_record.caution_ingredients[i] || '</ingredient>';
+--                 END IF;
+--             END LOOP;
+--             result_text := result_text || '</caution_ingredients>';
+--         END IF;
+--
+--         result_text := result_text || '</gene>';
+--     END LOOP;
+--
+--     RETURN '<genetic_analysis>' || result_text || '</genetic_analysis>';
+-- END;
+-- $$;
+CREATE OR REPLACE FUNCTION public.generate_genetic_analysis_section(user_variants text[])
+RETURNS TABLE(report_text text, findings genetic_finding[])
+LANGUAGE plpgsql AS
+$function$
 DECLARE
-    result_text text := '';
-    gene_record record;
+    analysis TEXT := E'YOUR GENETIC ANALYSIS\\n\\n';
+    all_findings genetic_finding[];
+    variant_record RECORD;
 BEGIN
-    FOR gene_record IN (
-        SELECT 
+    FOR variant_record IN
+        SELECT * FROM format_genetic_analysis(user_variants)
+    LOOP
+        analysis := analysis
+                    || E'\\n=== '
+                    || variant_record.section_title
+                    || E' ===\\n\\n'
+                    || variant_record.content
+                    || E'\\n\\n';
+
+        all_findings := array_append(all_findings, variant_record.variant_finding);
+    END LOOP;
+
+    RETURN QUERY SELECT analysis, all_findings;
+END;
+$function$;
+
+--
+-- Name: format_genetic_analysis(user_variants[]); Type: FUNCTION; Schema: public; Owner: cam
+--
+CREATE OR REPLACE FUNCTION public.format_genetic_analysis(user_variants text[])
+RETURNS TABLE(
+    section_title text,
+    content text,
+    priority integer,
+    variant_finding genetic_finding
+)
+LANGUAGE plpgsql AS
+$function$
+BEGIN
+    RETURN QUERY
+    WITH variant_findings AS (
+        SELECT DISTINCT ON (s.gene, s.category)
             s.gene,
+            s.rsid,
             s.category,
             s.evidence_strength,
-            array_agg(distinct sc.name) as characteristics,
-            array_agg(distinct i.name) as beneficial_ingredients,
-            array_agg(distinct ic.ingredient_name) as caution_ingredients
-        FROM snp s
-        LEFT JOIN snp_characteristic_link scl ON s.snp_id = scl.snp_id
-        LEFT JOIN skincharacteristic sc ON scl.characteristic_id = sc.characteristic_id
-        LEFT JOIN snp_ingredient_link sil ON s.snp_id = sil.snp_id
-        LEFT JOIN ingredient i ON sil.ingredient_id = i.ingredient_id
-        LEFT JOIN snp_ingredientcaution_link sicl ON s.snp_id = sicl.snp_id
-        LEFT JOIN ingredientcaution ic ON sicl.caution_id = ic.caution_id
-        WHERE s.rsid = ANY(user_rsids)
-        GROUP BY s.gene, s.category, s.evidence_strength
-        ORDER BY 
-            CASE 
+            s.effect,
+            get_genetic_findings(s.rsid),
+            CASE
                 WHEN s.evidence_strength = 'Strong' THEN 1
                 WHEN s.evidence_strength = 'Moderate' THEN 2
                 ELSE 3
+            END AS priority_order
+        FROM snp s
+        WHERE s.rsid = ANY(user_variants)
+        ORDER BY s.gene, s.category, priority_order
+    )
+    SELECT
+        format('%s (%s)', vf.gene, vf.category),
+        format(
+            E'Risk Level: %s\n\nWhat it means:\n%s\n\nAffects:\n%s\n\nRecommended Actions:\n%s',
+            vf.evidence_strength,
+            vf.effect,
+            array_to_string((vf.get_genetic_findings).characteristics, ', '),
+            CASE
+                WHEN (vf.get_genetic_findings).beneficial_ingredients IS NOT NULL THEN
+                    format(E'• Beneficial Ingredients:\n %s\n',
+                        array_to_string((vf.get_genetic_findings).beneficial_ingredients, ', ')
+                    )
+                ELSE ''
+            END ||
+            CASE
+                WHEN (vf.get_genetic_findings).caution_ingredients IS NOT NULL THEN
+                    format(E'\n• Ingredients to Avoid/Use with Caution:\n %s',
+                        array_to_string((vf.get_genetic_findings).caution_ingredients, ', ')
+                    )
+                ELSE ''
             END
-    ) LOOP
-        result_text := result_text || '<gene>';
-        result_text := result_text || '<name>' || gene_record.gene || '</name>';
-        result_text := result_text || '<category>' || gene_record.category || '</category>';
-        result_text := result_text || '<evidence>' || gene_record.evidence_strength || '</evidence>';
-        
-        -- Add characteristics if they exist
-        IF gene_record.characteristics IS NOT NULL AND gene_record.characteristics[1] IS NOT NULL THEN
-            result_text := result_text || '<characteristics>';
-            FOR i IN 1..array_length(gene_record.characteristics, 1) LOOP
-                IF gene_record.characteristics[i] IS NOT NULL THEN
-                    result_text := result_text || '<characteristic>' || gene_record.characteristics[i] || '</characteristic>';
-                END IF;
-            END LOOP;
-            result_text := result_text || '</characteristics>';
-        END IF;
-        
-        -- Add beneficial ingredients if they exist
-        IF gene_record.beneficial_ingredients IS NOT NULL AND gene_record.beneficial_ingredients[1] IS NOT NULL THEN
-            result_text := result_text || '<beneficial_ingredients>';
-            FOR i IN 1..array_length(gene_record.beneficial_ingredients, 1) LOOP
-                IF gene_record.beneficial_ingredients[i] IS NOT NULL THEN
-                    result_text := result_text || '<ingredient>' || gene_record.beneficial_ingredients[i] || '</ingredient>';
-                END IF;
-            END LOOP;
-            result_text := result_text || '</beneficial_ingredients>';
-        END IF;
-        
-        -- Add caution ingredients if they exist
-        IF gene_record.caution_ingredients IS NOT NULL AND gene_record.caution_ingredients[1] IS NOT NULL THEN
-            result_text := result_text || '<caution_ingredients>';
-            FOR i IN 1..array_length(gene_record.caution_ingredients, 1) LOOP
-                IF gene_record.caution_ingredients[i] IS NOT NULL THEN
-                    result_text := result_text || '<ingredient>' || gene_record.caution_ingredients[i] || '</ingredient>';
-                END IF;
-            END LOOP;
-            result_text := result_text || '</caution_ingredients>';
-        END IF;
-        
-        result_text := result_text || '</gene>';
-    END LOOP;
-    
-    RETURN '<genetic_analysis>' || result_text || '</genetic_analysis>';
+        ),
+        priority_order,
+        get_genetic_findings
+    FROM variant_findings vf
+    ORDER BY priority_order, gene;
 END;
-$$;
+$function$;
+
+--
+-- Name: get_genetic_findings(text); Type: FUNCTION; Schema: public; Owner: cam
+--
+CREATE OR REPLACE FUNCTION public.get_genetic_findings(variant_rsid text)
+RETURNS genetic_finding
+LANGUAGE plpgsql AS
+$function$
+DECLARE
+    finding genetic_finding;
+BEGIN
+    -- Get basic variant info
+    SELECT
+        s.rsid,
+        s.gene,
+        s.category,
+        s.evidence_strength,
+        s.effect,
+        array_agg(DISTINCT sc.name),
+        array_agg(DISTINCT i.name),
+        array_agg(DISTINCT ic.ingredient_name)
+    INTO finding
+    FROM snp s
+    LEFT JOIN snp_characteristic_link scl ON s.snp_id = scl.snp_id
+    LEFT JOIN skincharacteristic sc ON scl.characteristic_id = sc.characteristic_id
+    LEFT JOIN snp_ingredient_link sil ON s.snp_id = sil.snp_id
+    LEFT JOIN ingredient i ON sil.ingredient_id = i.ingredient_id
+    LEFT JOIN snp_ingredientcaution_link sicl ON s.snp_id = sicl.snp_id
+    LEFT JOIN ingredientcaution ic ON sicl.caution_id = ic.caution_id
+    WHERE s.rsid = variant_rsid
+    GROUP BY
+        s.rsid,
+        s.gene,
+        s.category,
+        s.evidence_strength,
+        s.effect;
+
+    RETURN finding;
+END;
+$function$;
+
+--
+-- Name: generate_summary_section(text[],genetic_finding[]); Type: FUNCTION; Schema: public; Owner: cam
+--
+CREATE OR REPLACE FUNCTION public.generate_summary_section(
+    user_variants text[],
+    genetic_data genetic_finding[] DEFAULT NULL::genetic_finding[]
+)
+RETURNS text
+LANGUAGE plpgsql AS
+$function$
+DECLARE
+    summary TEXT;
+    high_risk_count INTEGER := 0;
+    moderate_risk_count INTEGER := 0;
+    weak_risk_count INTEGER := 0;
+    categories TEXT[];
+    focus_areas TEXT;
+BEGIN
+    -- Get counts and categories from genetic findings
+    SELECT
+        COUNT(*) FILTER (WHERE (unnest).evidence_strength = 'Strong'),
+        COUNT(*) FILTER (WHERE (unnest).evidence_strength = 'Moderate'),
+        COUNT(*) FILTER (WHERE (unnest).evidence_strength = 'Weak'),
+        array_agg(DISTINCT (unnest).category)
+    INTO
+        high_risk_count,
+        moderate_risk_count,
+        weak_risk_count,
+        categories
+    FROM unnest(genetic_data);
+
+    -- Generate focus areas from characteristics
+    WITH trait_summary AS (
+        SELECT DISTINCT
+            category,
+            trait,
+            evidence_strength,
+            CASE evidence_strength
+                WHEN 'Strong' THEN 1
+                WHEN 'Moderate' THEN 2
+                ELSE 3
+            END AS priority
+        FROM unnest(genetic_data) gf,
+             unnest(gf.characteristics) AS trait
+        WHERE gf.characteristics IS NOT NULL
+    ),
+    grouped_traits AS (
+        SELECT
+            category,
+            MIN(priority) AS category_priority,
+            string_agg(trait, ', ' ORDER BY trait) AS traits
+        FROM trait_summary
+        GROUP BY category
+    )
+    SELECT
+        string_agg(
+            format(E'• %s: %s', category, traits),
+            E'\n'
+            ORDER BY category_priority, category
+        )
+    INTO focus_areas
+    FROM grouped_traits;
+
+    -- Generate summary text
+    summary := format(
+        E'
+GENETIC PROFILE SUMMARY
+
+Your DNA analysis revealed %s significant genetic variants that influence your skin health:
+
+• %s high-priority variants requiring specific attention
+• %s moderate-impact variants to consider
+• %s lower-impact variants identified
+
+Key Areas Affected:
+%s
+
+What This Means For You:
+Based on your genetic profile, your skin care routine should focus on:
+
+%s
+',
+        array_length(user_variants, 1),
+        high_risk_count,
+        moderate_risk_count,
+        weak_risk_count,
+        array_to_string(categories, ', '),
+        coalesce(focus_areas, 'No specific focus areas identified.')
+    );
+
+    RETURN summary;
+END;
+$function$;
+
+
 
 
 --
 -- Name: generate_ingredient_recommendations(text[]); Type: FUNCTION; Schema: public; Owner: cam
 --
-
 CREATE OR REPLACE FUNCTION public.generate_ingredient_recommendations(user_rsids text[]) RETURNS text
     LANGUAGE plpgsql
     AS $$

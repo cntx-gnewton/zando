@@ -1,4 +1,4 @@
-name,name,recommendation_strength,guidance_notes
+condition_id,ingredient_id,recommendation_strength,guidance_notes
 "Acne Vulgaris","Niacinamide","First-line","Regulates sebum production and reduces inflammation"
 "Acne Vulgaris","Salicylic Acid","First-line","Unclogs pores and reduces inflammation"
 "Acne Vulgaris","Azelaic Acid","First-line","Antimicrobial and anti-inflammatory properties"

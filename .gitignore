@@ -170,3 +170,5 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 /fastapi_migration/backend/cache/
+/fastapi_migration/backend/reports/
+/fastapi_migration/backend/uploads/

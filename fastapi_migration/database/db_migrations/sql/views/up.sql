@@ -1,6 +1,24 @@
 -- Split view creation into separate parts to isolate issues
 
 --
+-- Name: snp_beneficial_ingredients; Type: VIEW; Schema: public; Owner: cam
+--
+
+CREATE OR REPLACE VIEW public.snp_beneficial_ingredients AS
+ SELECT s.rsid,
+    s.gene,
+    s.category AS genetic_category,
+    i.name AS ingredient_name,
+    i.mechanism AS ingredient_mechanism,
+    sil.benefit_mechanism,
+    sil.recommendation_strength,
+    sil.evidence_level
+   FROM ((public.snp_ingredient_link sil
+     JOIN public.snp s ON ((s.snp_id = sil.snp_id+20)))
+     JOIN public.ingredient i ON ((i.ingredient_id = sil.ingredient_id)))
+  ORDER BY sil.evidence_level DESC, sil.recommendation_strength;
+
+--
 -- Name: comprehensive_recommendations; Type: VIEW; Schema: public; Owner: cam
 --
 

@@ -111,6 +111,7 @@ CREATE TABLE IF NOT EXISTS public.snp_ingredient_link (
     benefit_mechanism text,
     recommendation_strength character varying,
     evidence_level character varying,
+    narrative character varying,
     CONSTRAINT snp_ingredient_link_evidence_level_check CHECK (((evidence_level)::text = ANY ((ARRAY['Strong'::character varying, 'Moderate'::character varying, 'Weak'::character varying])::text[]))),
     CONSTRAINT snp_ingredient_link_recommendation_strength_check CHECK (((recommendation_strength)::text = ANY ((ARRAY['First-line'::character varying, 'Second-line'::character varying, 'Supportive'::character varying])::text[])))
 );
@@ -126,6 +127,7 @@ CREATE TABLE IF NOT EXISTS public.snp_ingredientcaution_link (
     caution_id integer NOT NULL,
     evidence_level character varying,
     notes text,
+    narrative character varying,
     CONSTRAINT snp_ingredientcaution_link_evidence_level_check CHECK (((evidence_level)::text = ANY ((ARRAY['Strong'::character varying, 'Moderate'::character varying, 'Weak'::character varying])::text[])))
 );
 

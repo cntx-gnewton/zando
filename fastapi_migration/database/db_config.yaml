@@ -1,0 +1,29 @@
+# Database Configuration for Zando Migration Tool
+
+# Local development configuration
+#development:
+#  user: "postgres"
+#  password: "postgres"
+#  host: "localhost"
+#  port: 5432
+#  database: "postgres"
+#  use_gcp: false
+development:
+  use_gcp: true
+  instance_connection_name: "zerosandones-369:us-central1:zando-dev"
+  user: "postgres"
+  password: "postgres"
+  database: "postgres"
+  use_private_ip: false
+
+# Production configuration for Google Cloud SQL
+production:
+  use_gcp: true
+  instance_connection_name: "zerosandones-369:us-east1:zando-sql"
+  user: "postgres"
+  password: "postgres"
+  database: "postgres"
+  use_private_ip: false
+
+# Default profile to use
+active_profile: development

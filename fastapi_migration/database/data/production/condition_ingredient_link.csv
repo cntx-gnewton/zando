@@ -1,0 +1,34 @@
+condition_id,ingredient_id,recommendation_strength,guidance_notes
+40,73,First-line,Recommended based on clinical evidence for Eczema
+41,73,First-line,Recommended based on clinical evidence for Dry Skin
+40,74,First-line,Recommended based on clinical evidence for Eczema
+41,74,First-line,Recommended based on clinical evidence for Dry Skin
+40,75,First-line,Recommended based on clinical evidence for Eczema
+42,75,First-line,Recommended based on clinical evidence for Hyperpigmentation
+44,75,First-line,Recommended based on clinical evidence for Acne
+45,75,First-line,Recommended based on clinical evidence for Rosacea
+41,76,Second-line,Recommended based on clinical evidence for Dry Skin
+42,77,First-line,Recommended based on clinical evidence for Hyperpigmentation
+47,77,First-line,Recommended based on clinical evidence for Photoaging
+48,77,First-line,Recommended based on clinical evidence for Loss of Elasticity
+47,78,First-line,Recommended based on clinical evidence for Photoaging
+44,79,Second-line,Recommended based on clinical evidence for Acne
+45,79,Second-line,Recommended based on clinical evidence for Rosacea
+47,81,First-line,Recommended based on clinical evidence for Photoaging
+48,81,First-line,Recommended based on clinical evidence for Loss of Elasticity
+47,82,Second-line,Recommended based on clinical evidence for Photoaging
+48,82,Second-line,Recommended based on clinical evidence for Loss of Elasticity
+42,85,Second-line,Recommended based on clinical evidence for Hyperpigmentation
+42,87,First-line,Recommended based on clinical evidence for Hyperpigmentation
+42,88,First-line,Recommended based on clinical evidence for Hyperpigmentation
+45,89,First-line,Recommended based on clinical evidence for Rosacea
+49,89,First-line,Recommended based on clinical evidence for Contact Dermatitis
+44,90,First-line,Recommended based on clinical evidence for Acne
+40,91,First-line,Recommended based on clinical evidence for Eczema
+49,91,First-line,Recommended based on clinical evidence for Contact Dermatitis
+49,92,Second-line,Recommended based on clinical evidence for Contact Dermatitis
+44,93,First-line,Recommended based on clinical evidence for Acne
+45,93,First-line,Recommended based on clinical evidence for Rosacea
+48,94,Second-line,Recommended based on clinical evidence for Loss of Elasticity
+41,95,Second-line,Recommended based on clinical evidence for Dry Skin
+49,96,Second-line,Recommended based on clinical evidence for Contact Dermatitis

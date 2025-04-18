@@ -1,0 +1,147 @@
+
+
+
+
+(venv) greysonnewton@gnnewton-macbook db % python scripts/manage.py --env cloud init
+INFO:__main__:Using Google Cloud SQL instance: zerosandones-369:us-central1:zando-dev
+INFO:__main__:Using database: postgres
+INFO:__main__:Skipping database creation step (Cloud SQL databases must be created in the Google Cloud Console)
+INFO:db_connection:Google Cloud SQL connection pool initialized for zerosandones-369:us-central1:zando-dev
+INFO:migrate:Migration tracking table initialized
+INFO:migrate:Applying schema.sql from migration 0001_initial_schema
+INFO:migrate:Applying types.sql from migration 0001_initial_schema
+ERROR:db_connection:Error executing SQL script: (pg8000.exceptions.DatabaseError) {'S': 'ERROR', 'V': 'ERROR', 'C': '42710', 'M': 'type "genetic_finding" already exists', 'F': 'typecmds.c', 'L': '2546', 'R': 'DefineCompositeType'}
+[SQL: -- Custom Types for Zando Genomic Analysis
+
+BEGIN;
+
+-- Create custom type for genetic findings (used in report generation)
+CREATE TYPE genetic_finding AS (
+    rsid text,
+    gene text,
+    category text,
+    evidence_strength text,
+    effect text,
+    characteristics text[],
+    beneficial_ingredients text[],
+    caution_ingredients text[]
+);
+
+-- Create custom type for PDF styling
+CREATE TYPE pdf_style AS (
+    font_name text,
+    font_size integer,
+    alignment text,
+    spacing numeric,
+    is_bold boolean
+);
+
+-- Create enum type for skincare routine steps
+CREATE TYPE routine_step_type AS ENUM (
+    'Cleanser',
+    'Treatment',
+    'Moisturizer',
+    'Sun Protection'
+);
+
+COMMIT;]
+(Background on this error at: https://sqlalche.me/e/20/4xp6)
+Traceback (most recent call last):
+  File "/Users/greysonnewton/projects/Untitled/zando/db/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1964, in _exec_single_context
+    self.dialect.do_execute(
+  File "/Users/greysonnewton/projects/Untitled/zando/db/venv/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 942, in do_execute
+    cursor.execute(statement, parameters)
+  File "/Users/greysonnewton/projects/Untitled/zando/db/venv/lib/python3.11/site-packages/pg8000/dbapi.py", line 468, in execute
+    self._context = self._c.execute_simple(operation)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/greysonnewton/projects/Untitled/zando/db/venv/lib/python3.11/site-packages/pg8000/core.py", line 686, in execute_simple
+    self.handle_messages(context)
+  File "/Users/greysonnewton/projects/Untitled/zando/db/venv/lib/python3.11/site-packages/pg8000/core.py", line 835, in handle_messages
+    raise context.error
+pg8000.exceptions.DatabaseError: {'S': 'ERROR', 'V': 'ERROR', 'C': '42710', 'M': 'type "genetic_finding" already exists', 'F': 'typecmds.c', 'L': '2546', 'R': 'DefineCompositeType'}
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/greysonnewton/projects/Untitled/zando/db/scripts/manage.py", line 225, in <module>
+    args.func(args)
+  File "/Users/greysonnewton/projects/Untitled/zando/db/scripts/manage.py", line 30, in init_db
+    run_migrations(args.env)
+  File "/Users/greysonnewton/projects/Untitled/zando/db/scripts/migrate.py", line 130, in run_migrations
+    apply_migration(conn, migration_dir)
+  File "/Users/greysonnewton/projects/Untitled/zando/db/scripts/migrate.py", line 101, in apply_migration
+    execute_sql_script_file(conn, sql_file)
+  File "/Users/greysonnewton/projects/Untitled/zando/db/scripts/db_connection.py", line 168, in execute_sql_script_file
+    return execute_sql_script(connection, script)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/greysonnewton/projects/Untitled/zando/db/scripts/db_connection.py", line 149, in execute_sql_script
+    return connection.execute(sqlalchemy.text(script))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/greysonnewton/projects/Untitled/zando/db/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1416, in execute
+    return meth(
+           ^^^^^
+  File "/Users/greysonnewton/projects/Untitled/zando/db/venv/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 523, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/greysonnewton/projects/Untitled/zando/db/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1638, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/greysonnewton/projects/Untitled/zando/db/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1843, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/greysonnewton/projects/Untitled/zando/db/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1983, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/Users/greysonnewton/projects/Untitled/zando/db/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2352, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/Users/greysonnewton/projects/Untitled/zando/db/venv/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1964, in _exec_single_context
+    self.dialect.do_execute(
+  File "/Users/greysonnewton/projects/Untitled/zando/db/venv/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 942, in do_execute
+    cursor.execute(statement, parameters)
+  File "/Users/greysonnewton/projects/Untitled/zando/db/venv/lib/python3.11/site-packages/pg8000/dbapi.py", line 468, in execute
+    self._context = self._c.execute_simple(operation)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/greysonnewton/projects/Untitled/zando/db/venv/lib/python3.11/site-packages/pg8000/core.py", line 686, in execute_simple
+    self.handle_messages(context)
+  File "/Users/greysonnewton/projects/Untitled/zando/db/venv/lib/python3.11/site-packages/pg8000/core.py", line 835, in handle_messages
+    raise context.error
+sqlalchemy.exc.DatabaseError: (pg8000.exceptions.DatabaseError) {'S': 'ERROR', 'V': 'ERROR', 'C': '42710', 'M': 'type "genetic_finding" already exists', 'F': 'typecmds.c', 'L': '2546', 'R': 'DefineCompositeType'}
+[SQL: -- Custom Types for Zando Genomic Analysis
+
+BEGIN;
+
+-- Create custom type for genetic findings (used in report generation)
+CREATE TYPE genetic_finding AS (
+    rsid text,
+    gene text,
+    category text,
+    evidence_strength text,
+    effect text,
+    characteristics text[],
+    beneficial_ingredients text[],
+    caution_ingredients text[]
+);
+
+-- Create custom type for PDF styling
+CREATE TYPE pdf_style AS (
+    font_name text,
+    font_size integer,
+    alignment text,
+    spacing numeric,
+    is_bold boolean
+);
+
+-- Create enum type for skincare routine steps
+CREATE TYPE routine_step_type AS ENUM (
+    'Cleanser',
+    'Treatment',
+    'Moisturizer',
+    'Sun Protection'
+);
+
+COMMIT;]
+(Background on this error at: https://sqlalche.me/e/20/4xp6)
+ERROR:asyncio:Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x1146962d0>
+ERROR:asyncio:Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x1145abe00>, 6294.9197215), (<aiohttp.client_proto.ResponseHandler object at 0x1145abee0>, 6294.933316333)])']
+connector: <aiohttp.connector.TCPConnector object at 0x114696310

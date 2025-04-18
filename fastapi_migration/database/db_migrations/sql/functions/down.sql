@@ -1,0 +1,48 @@
+-- Drop all functions created in up.sql
+DROP FUNCTION IF EXISTS public.analyze_genetic_risks(text[]);
+DROP FUNCTION IF EXISTS public.find_beneficial_ingredients(text[]);
+DROP FUNCTION IF EXISTS public.find_genetic_characteristics(text[]);
+DROP FUNCTION IF EXISTS public.find_ingredient_cautions(text[]);
+DROP FUNCTION IF EXISTS public.format_pdf_section(text, text[], public.pdf_style);
+DROP FUNCTION IF EXISTS public.generate_characteristic_section(text[]);
+DROP FUNCTION IF EXISTS public.generate_genetic_analysis_section(text[]);
+DROP FUNCTION IF EXISTS public.format_genetic_analysis(text[]);
+DROP FUNCTION IF EXISTS public.get_genetic_findings(text);
+DROP FUNCTION IF EXISTS public.generate_summary_section(text[], public.genetic_finding[]);
+DROP FUNCTION IF EXISTS public.generate_ingredient_recommendations(text[]);
+DROP FUNCTION IF EXISTS public.generate_summary_section(text[]);
+
+-- Drop additional functions that may exist from previous migrations
+DROP FUNCTION IF EXISTS public.apply_report_formatting(text, text, jsonb);
+DROP FUNCTION IF EXISTS public.calculate_ingredient_score(integer, text[]);
+DROP FUNCTION IF EXISTS public.calculate_product_compatibility(integer, text[], jsonb, jsonb);
+DROP FUNCTION IF EXISTS public.calculate_routine_score(integer, jsonb);
+DROP FUNCTION IF EXISTS public.format_gene_entry(text, text, text);
+DROP FUNCTION IF EXISTS public.format_genetic_summary(text[], text);
+DROP FUNCTION IF EXISTS public.format_ingredient_list(text[]);
+DROP FUNCTION IF EXISTS public.format_risk_level(text);
+DROP FUNCTION IF EXISTS public.format_section_header(text);
+DROP FUNCTION IF EXISTS public.format_warning_entry(text, text);
+DROP FUNCTION IF EXISTS public.generate_complete_report(text[]);
+DROP FUNCTION IF EXISTS public.generate_detailed_recommendations_section(text[]);
+DROP FUNCTION IF EXISTS public.generate_recommendations_section(text[], public.genetic_finding[]);
+DROP FUNCTION IF EXISTS public.generate_report_from_path(text);
+DROP FUNCTION IF EXISTS public.generate_skincare_report(text[]);
+DROP FUNCTION IF EXISTS public.generate_skincare_routine(text[]);
+DROP FUNCTION IF EXISTS public.get_categorized_recommendations(text[], public.genetic_finding[]);
+DROP FUNCTION IF EXISTS public.get_category_impacts(public.genetic_finding[]);
+DROP FUNCTION IF EXISTS public.get_ingredient_cautions(text[], public.genetic_finding[]);
+DROP FUNCTION IF EXISTS public.get_ingredients_to_avoid(text[]);
+DROP FUNCTION IF EXISTS public.get_or_create_benefit(text);
+DROP FUNCTION IF EXISTS public.get_recommended_ingredients(text[]);
+DROP FUNCTION IF EXISTS public.get_report_sections();
+DROP FUNCTION IF EXISTS public.get_section_style(text);
+DROP FUNCTION IF EXISTS public.get_variant_detailed_effects(text);
+DROP FUNCTION IF EXISTS public.parse_report_sections(text);
+DROP FUNCTION IF EXISTS public.prepare_pdf_report(text);
+DROP FUNCTION IF EXISTS public.process_ancestry_file(text);
+DROP FUNCTION IF EXISTS public.process_dna_file(text);
+DROP FUNCTION IF EXISTS public.process_dna_file_to_report(text);
+DROP FUNCTION IF EXISTS public.split_and_clean_list(text);
+DROP FUNCTION IF EXISTS public.structure_pdf_content(text);
+DROP FUNCTION IF EXISTS public.validate_dna_file_format(text);

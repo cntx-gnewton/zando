@@ -1,0 +1,14 @@
+condition_id,name,description,severity_scale
+40,Eczema,"Chronic inflammatory skin condition causing dry, itchy, and inflamed skin patches",EASI (Eczema Area and Severity Index)
+41,Dry Skin,"Reduced skin moisture and barrier dysfunction leading to rough, flaky skin",Clinician-rated 0-4 scale
+42,Hyperpigmentation,Excess melanin production causing dark patches or spots,MASI (Melasma Area and Severity Index)
+43,Photosensitivity,Increased sensitivity to UV radiation leading to sunburns and damage,Fitzpatrick Scale
+44,Acne,Inflammatory condition affecting sebaceous glands and hair follicles,IGA (Investigator's Global Assessment) Scale
+45,Rosacea,Chronic inflammatory condition causing facial redness and bumps,IGA-RSS (Rosacea Severity Score)
+46,Psoriasis,Autoimmune condition causing rapid skin cell turnover and inflammation,PASI (Psoriasis Area Severity Index)
+47,Photoaging,Premature aging due to UV exposure and environmental damage,Glogau Photoaging Scale
+48,Loss of Elasticity,Reduced skin firmness and elasticity due to collagen/elastin changes,Cutometer measurements
+49,Contact Dermatitis,Skin inflammation caused by contact with irritants or allergens,CDSI (Contact Dermatitis Severity Index)
+50,Product Sensitivity,Increased reactivity to skincare ingredients and products,RSSS (Reactive Skin Severity Score)
+51,Telangiectasia,Visible dilated blood vessels near skin surface,Modified IGA for telangiectasia
+52,Facial Flushing,Temporary redness due to vasodilation,Clinician-rated 0-3 scale

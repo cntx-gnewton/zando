@@ -1,0 +1,38 @@
+snp_id,caution_id,evidence_level,notes,narrative
+116,46,Weak,Based on genetic variation affecting Sensitivity pathway,Retinol may cause heightened irritation in ALDH3A2/CYP26A1 retinoid-sensitive carriers.
+117,46,Weak,Based on genetic variation affecting Sensitivity pathway,Retinol may cause heightened irritation in ALDH3A2/CYP26A1 retinoid-sensitive carriers.
+116,47,Weak,Based on genetic variation affecting Sensitivity pathway,Tretinoin can induce excessive redness or peeling for ALDH3A2/CYP26A1 variants.
+117,47,Weak,Based on genetic variation affecting Sensitivity pathway,Tretinoin can induce excessive redness or peeling for ALDH3A2/CYP26A1 variants.
+105,48,Strong,Based on genetic variation affecting Barrier Function pathway,"SLS strips lipids from FLG-impaired skin, causing further barrier damage."
+105,49,Strong,Based on genetic variation affecting Barrier Function pathway,Denatured Alcohol can severely dehydrate FLG-deficient skin barriers.
+105,50,Strong,Based on genetic variation affecting Barrier Function pathway,Essential Oils may irritate already-sensitive FLG variant barriers.
+106,51,Strong,Based on genetic variation affecting Inflammation pathway,High AHA levels can trigger intense inflammation in IL6/TNF-α variants.
+107,51,Strong,Based on genetic variation affecting Inflammation pathway,High AHA levels can trigger intense inflammation in IL6/TNF-α variants.
+108,51,Strong,Based on genetic variation affecting Inflammation pathway,High AHA levels can trigger intense inflammation in IL6/TNF-α variants.
+106,52,Strong,Based on genetic variation affecting Inflammation pathway,Benzoyl Peroxide can provoke extra redness & peeling for IL6/TNF-α carriers.
+107,52,Strong,Based on genetic variation affecting Inflammation pathway,Benzoyl Peroxide can provoke extra redness & peeling for IL6/TNF-α carriers.
+108,52,Strong,Based on genetic variation affecting Inflammation pathway,Benzoyl Peroxide can provoke extra redness & peeling for IL6/TNF-α carriers.
+101,53,Strong,Based on genetic variation affecting Pigmentation pathway,Hydroquinone can cause paradoxical hyperpigmentation in MC1R/TYR carriers.
+102,53,Strong,Based on genetic variation affecting Pigmentation pathway,Hydroquinone can cause paradoxical hyperpigmentation in MC1R/TYR carriers.
+103,53,Strong,Based on genetic variation affecting Pigmentation pathway,Hydroquinone can cause paradoxical hyperpigmentation in MC1R/TYR carriers.
+101,54,Strong,Based on genetic variation affecting Pigmentation pathway,Bergamot Oil can induce photosensitivity & blotchy pigmentation in MC1R/TYR variants.
+102,54,Strong,Based on genetic variation affecting Pigmentation pathway,Bergamot Oil can induce photosensitivity & blotchy pigmentation in MC1R/TYR variants.
+103,54,Strong,Based on genetic variation affecting Pigmentation pathway,Bergamot Oil can induce photosensitivity & blotchy pigmentation in MC1R/TYR variants.
+112,55,Moderate,Based on genetic variation affecting Antioxidant pathway,High Vitamin C can paradoxically stress SOD2/CAT variants lacking stable antioxidant defenses.
+113,55,Moderate,Based on genetic variation affecting Antioxidant pathway,High Vitamin C can paradoxically stress SOD2/CAT variants lacking stable antioxidant defenses.
+112,56,Moderate,Based on genetic variation affecting Antioxidant pathway,Unstable antioxidants risk pro-oxidant behavior if SOD2/CAT are insufficient.
+113,56,Moderate,Based on genetic variation affecting Antioxidant pathway,Unstable antioxidants risk pro-oxidant behavior if SOD2/CAT are insufficient.
+119,57,Weak,Based on genetic variation affecting Vascular pathway,Menthol can intensify flushing for NOS3 gene carriers with vasodilatory overreactions.
+119,58,Weak,Based on genetic variation affecting Vascular pathway,Peppermint Oil may trigger flushing episodes for NOS3 variants with vascular reactivity.
+105,59,Strong,General sensitivity consideration based on Barrier Function impact,Synthetic Fragrances often trigger dryness/irritation in barrier- or inflammation-prone genetics.
+106,59,Strong,General sensitivity consideration based on Inflammation impact,Synthetic Fragrances often trigger dryness/irritation in barrier- or inflammation-prone genetics.
+107,59,Strong,General sensitivity consideration based on Inflammation impact,Synthetic Fragrances often trigger dryness/irritation in barrier- or inflammation-prone genetics.
+108,59,Strong,General sensitivity consideration based on Inflammation impact,Synthetic Fragrances often trigger dryness/irritation in barrier- or inflammation-prone genetics.
+116,59,Weak,General sensitivity consideration based on Sensitivity impact,Synthetic Fragrances often trigger dryness/irritation in barrier- or inflammation-prone genetics.
+117,59,Weak,General sensitivity consideration based on Sensitivity impact,Synthetic Fragrances often trigger dryness/irritation in barrier- or inflammation-prone genetics.
+105,60,Strong,General sensitivity consideration based on Barrier Function impact,Chemical Filters may cause stinging or redness in sensitive/inflamed skin profiles.
+106,60,Strong,General sensitivity consideration based on Inflammation impact,Chemical Filters may cause stinging or redness in sensitive/inflamed skin profiles.
+107,60,Strong,General sensitivity consideration based on Inflammation impact,Chemical Filters may cause stinging or redness in sensitive/inflamed skin profiles.
+108,60,Strong,General sensitivity consideration based on Inflammation impact,Chemical Filters may cause stinging or redness in sensitive/inflamed skin profiles.
+116,60,Weak,General sensitivity consideration based on Sensitivity impact,Chemical Filters may cause stinging or redness in sensitive/inflamed skin profiles.
+117,60,Weak,General sensitivity consideration based on Sensitivity impact,Chemical Filters may cause stinging or redness in sensitive/inflamed skin profiles.

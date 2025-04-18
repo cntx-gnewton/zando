@@ -1,0 +1,16 @@
+caution_id,ingredient_name,category,risk_mechanism,affected_characteristic,alternative_ingredients
+46,Retinol,Use with Caution,May cause increased irritation in individuals with retinoid metabolism variants,Product Sensitivity,"Bakuchiol, Peptides"
+47,Tretinoin,Use with Caution,Higher risk of irritation in retinoid metabolism variant carriers,Product Sensitivity,"Bakuchiol, Niacinamide"
+48,Sodium Lauryl Sulfate,Avoid,"Disrupts barrier function, particularly risky with FLG mutations",Barrier Function,Gentle sulfate-free cleansers
+49,Denatured Alcohol,Avoid,Can severely compromise impaired skin barrier,Barrier Function,"Glycerin, Butylene Glycol"
+50,Essential Oils,Use with Caution,May irritate sensitive or barrier-compromised skin,Barrier Function,Fragrance-free alternatives
+51,High-concentration AHAs,Use with Caution,May trigger excessive inflammation in sensitive individuals,Inflammatory Response,"PHAs, low concentration lactic acid"
+52,Benzoyl Peroxide,Use with Caution,Can cause increased inflammation in sensitive skin,Inflammatory Response,"Azelaic Acid, Niacinamide"
+53,Hydroquinone,Use with Caution,May cause paradoxical hyperpigmentation in some individuals,Melanin Production,"Kojic Acid, Vitamin C, Arbutin"
+54,Bergamot Oil,Avoid,Can cause photosensitivity and irregular pigmentation,UV Sensitivity,Photostable botanical extracts
+55,High-concentration Vitamin C,Use with Caution,May cause oxidative stress in sensitive individuals,Antioxidant Capacity,"Lower concentrations, stable derivatives"
+56,Unstable Antioxidants,Avoid,Can become pro-oxidant in certain conditions,Antioxidant Capacity,Stable antioxidant formulations
+57,Menthol,Use with Caution,Can trigger vasodilation and flushing,Vascular Reactivity,"Centella Asiatica, Allantoin"
+58,Peppermint Oil,Use with Caution,May increase facial flushing,Vascular Reactivity,"Chamomile, Green Tea Extract"
+59,Synthetic Fragrances,Use with Caution,Common trigger for sensitive skin reactions,Product Sensitivity,Fragrance-free formulations
+60,Chemical Sunscreen Filters,Use with Caution,May cause reactions in sensitive individuals,UV Sensitivity,Mineral sunscreens

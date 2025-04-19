@@ -11,26 +11,32 @@ import NotFoundPage from './pages/NotFound';
 
 // Layout components
 import MainLayout from './components/layout/MainLayout';
+import { ProtectedRoute } from './components/auth';
 
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
+      {/* Public routes */}
       <Route path="/" element={<MainLayout />}>
         <Route index element={<HomePage />} />
-        <Route path="dashboard" element={<DashboardPage />} />
-        <Route path="report" element={<ReportPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+        
+        {/* Protected routes - require authentication */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="report" element={<ReportPage />} />
+          <Route path="account" element={<AccountPage />} />
+          
+          <Route path="reports">
+            <Route index element={<ReportsPage />} />
+            <Route path=":reportId" element={<ReportsPage />} />
+          </Route>
+        </Route>
         
         {/* Redirects from old paths */}
         <Route path="upload" element={<Navigate to="/report" replace />} />
         <Route path="analysis" element={<Navigate to="/report" replace />} />
         <Route path="analysis/:analysisId" element={<Navigate to="/report" replace />} />
-        
-        <Route path="reports">
-          <Route index element={<ReportsPage />} />
-          <Route path=":reportId" element={<ReportsPage />} />
-        </Route>
-        <Route path="account" element={<AccountPage />} />
-        <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
   );

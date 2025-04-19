@@ -1,25 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUser, FaSignOutAlt, FaChevronDown, FaBars } from 'react-icons/fa';
+import useAuth from '../../hooks/useAuth';
 
 const Header: React.FC = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState('User');
+  const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
-  
-  useEffect(() => {
-    // Check if user is logged in via Google
-    const token = localStorage.getItem('google_token');
-    if (token) {
-      setIsLoggedIn(true);
-      
-      // In a real app, you would decode the JWT token or make an API call
-      // to get the user's name. For now, we'll use a placeholder.
-      setUserName('Google User');
-    }
-  }, []);
   
   return (
     <header className="bg-white shadow-sm">
@@ -35,17 +23,12 @@ const Header: React.FC = () => {
             
             {/* Desktop Navigation Links */}
             <nav className="hidden md:ml-6 md:flex md:space-x-4 items-center">
-              <Link to="/dashboard" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">
-                Dashboard
-              </Link>
-              <Link to="/upload" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">
-                Upload DNA
-              </Link>
-              <Link to="/analysis" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">
-                Analysis
+              {/* Dashboard link removed */}
+              <Link to="/report" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">
+                Generate Report
               </Link>
               <Link to="/reports" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">
-                Reports
+                My Reports
               </Link>
             </nav>
           </div>
@@ -53,7 +36,7 @@ const Header: React.FC = () => {
           {/* User menu and mobile menu button */}
           <div className="flex items-center">
             <div className="hidden md:ml-4 md:flex md:items-center">
-              {isLoggedIn ? (
+              {isAuthenticated ? (
                 <div className="ml-3 relative">
                   <div>
                     <button
@@ -62,9 +45,9 @@ const Header: React.FC = () => {
                     >
                       <span className="sr-only">Open user menu</span>
                       <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white">
-                        {userName.charAt(0)}
+                        {user?.name.charAt(0)}
                       </div>
-                      <span className="ml-2 text-gray-700">{userName}</span>
+                      <span className="ml-2 text-gray-700">{user?.name}</span>
                       <FaChevronDown className="ml-1 h-4 w-4 text-gray-500" />
                     </button>
                   </div>
@@ -83,10 +66,7 @@ const Header: React.FC = () => {
                       <button 
                         className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                         onClick={() => {
-                          // Handle logout
-                          localStorage.removeItem('google_token');
-                          setIsLoggedIn(false);
-                          setUserName('User');
+                          logout();
                           setDropdownOpen(false);
                           navigate('/');
                         }}
@@ -122,46 +102,33 @@ const Header: React.FC = () => {
       {mobileMenuOpen && (
         <div className="md:hidden">
           <div className="pt-2 pb-3 space-y-1">
+            {/* Dashboard link removed */}
             <Link 
-              to="/dashboard" 
+              to="/report" 
               className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Dashboard
-            </Link>
-            <Link 
-              to="/upload" 
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Upload DNA
-            </Link>
-            <Link 
-              to="/analysis" 
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Analysis
+              Generate Report
             </Link>
             <Link 
               to="/reports" 
               className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Reports
+              My Reports
             </Link>
           </div>
           
-          {isLoggedIn ? (
+          {isAuthenticated ? (
             <div className="pt-4 pb-3 border-t border-gray-200">
               <div className="flex items-center px-4">
                 <div className="flex-shrink-0">
                   <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center text-white">
-                    {userName.charAt(0)}
+                    {user?.name.charAt(0)}
                   </div>
                 </div>
                 <div className="ml-3">
-                  <div className="text-base font-medium text-gray-800">{userName}</div>
+                  <div className="text-base font-medium text-gray-800">{user?.name}</div>
                 </div>
               </div>
               <div className="mt-3 space-y-1">
@@ -175,10 +142,7 @@ const Header: React.FC = () => {
                 <button 
                   className="w-full text-left block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
                   onClick={() => {
-                    // Handle logout
-                    localStorage.removeItem('google_token');
-                    setIsLoggedIn(false);
-                    setUserName('User');
+                    logout();
                     setMobileMenuOpen(false);
                     navigate('/');
                   }}

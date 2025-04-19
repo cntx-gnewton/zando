@@ -1,18 +1,15 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import AppRoutes from './routes';
-import { AnalysisProvider } from './contexts/AnalysisContext';
-import { NotificationProvider } from './contexts/NotificationContext';
+import { AppProviders } from './contexts';
 import './App.css';
 
 const App: React.FC = () => {
   return (
     <BrowserRouter>
-      <NotificationProvider>
-        <AnalysisProvider>
-          <AppRoutes />
-        </AnalysisProvider>
-      </NotificationProvider>
+      <AppProviders>
+        <AppRoutes />
+      </AppProviders>
     </BrowserRouter>
   );
 };

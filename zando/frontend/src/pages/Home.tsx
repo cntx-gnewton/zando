@@ -1,26 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaFileMedical, FaDna, FaFileAlt, FaUser } from 'react-icons/fa';
 import { GoogleLogin } from "@react-oauth/google";
+import useAuth from '../hooks/useAuth';
 
 const HomePage: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isAuthenticated, login } = useAuth();
   const navigate = useNavigate();
-  
-  useEffect(() => {
-    // Check if user is already logged in
-    const token = localStorage.getItem('google_token');
-    if (token) {
-      setIsLoggedIn(true);
-    }
-  }, []);
 
   const handleLoginSuccess = (credentialResponse: any) => {
     console.log('Google login successful:', credentialResponse);
+    login(credentialResponse.credential);
     
-    // Store the token in localStorage
-    localStorage.setItem('google_token', credentialResponse.credential);
-    setIsLoggedIn(true);
+    // Navigate to report page after login
+    navigate('/report');
   };
 
   return (
@@ -35,39 +28,30 @@ const HomePage: React.FC = () => {
             Upload your DNA data to discover personalized skincare recommendations based on your unique genetic makeup.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center space-y-4">
-            {isLoggedIn ? (
-              <Link
-                to="/report"
-                className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-              >
-                <FaFileMedical className="mr-2" />
-                Generate Your Report
-              </Link>
-            ) : (
-              <div className="space-y-4">
-                <div className="text-center mb-2">
-                  <p className="text-gray-600 mb-4">Sign in to get started:</p>
-                  <div className="flex justify-center">
-                    <GoogleLogin
-                      onSuccess={handleLoginSuccess}
-                      onError={() => console.log('Login Failed')}
-                      useOneTap
-                      theme="outline"
-                      text="continue_with"
-                      shape="rectangular"
-                    />
-                  </div>
+            <div className="space-y-4">
+              <div className="text-center mb-2">
+                <p className="text-gray-600 mb-4">Sign in to access exclusive features:</p>
+                <div className="flex justify-center">
+                  <GoogleLogin
+                    onSuccess={handleLoginSuccess}
+                    onError={() => console.log('Login Failed')}
+                    useOneTap
+                    theme="outline"
+                    text="continue_with"
+                    shape="rectangular"
+                  />
                 </div>
-                <p className="text-sm text-gray-500 pt-2">Or</p>
-                <Link
-                  to="/report"
-                  className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                >
-                  <FaFileMedical className="mr-2" />
-                  Continue as Guest
-                </Link>
               </div>
-            )}
+              <div className="mt-4 text-center">
+                <p className="text-blue-600 font-semibold">Sign in to:</p>
+                <ul className="mt-2 text-gray-600">
+                  <li>• Generate personalized reports</li>
+                  <li>• Access your dashboard</li>
+                  <li>• View past analysis results</li>
+                  <li>• Manage your account</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -128,15 +112,29 @@ const HomePage: React.FC = () => {
             </h2>
             <p className="mt-4 text-lg text-gray-500">
               Your DNA holds the keys to understanding your skin's unique needs. 
-              Get started today and receive personalized skincare recommendations.
+              Sign in today to get personalized skincare recommendations.
             </p>
             <div className="mt-8">
-              <Link
-                to="/report"
-                className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-              >
-                Generate Your Report
-              </Link>
+              {isAuthenticated ? (
+                <Link
+                  to="/report"
+                  className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                >
+                  Generate Your Report
+                </Link>
+              ) : (
+                <div className="flex justify-center">
+                  <GoogleLogin
+                    onSuccess={handleLoginSuccess}
+                    onError={() => console.log('Login Failed')}
+                    useOneTap={false}
+                    theme="outline"
+                    text="signin_with"
+                    shape="rectangular"
+                    size="large"
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>

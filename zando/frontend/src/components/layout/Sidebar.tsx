@@ -7,15 +7,27 @@ import {
   FaTachometerAlt,
   FaFileMedical
 } from 'react-icons/fa';
+import useAuth from '../../hooks/useAuth';
 
 const Sidebar: React.FC = () => {
-  const navigation = [
+  const { isAuthenticated } = useAuth();
+  
+  // Public navigation items
+  const publicNavigation = [
     { name: 'Home', to: '/', icon: FaHome },
-    { name: 'Dashboard', to: '/dashboard', icon: FaTachometerAlt },
+  ];
+  
+  // Protected navigation items (only for authenticated users)
+  const protectedNavigation = [
     { name: 'Generate Report', to: '/report', icon: FaFileMedical },
-    { name: 'Reports', to: '/reports', icon: FaFileAlt },
+    { name: 'My Reports', to: '/reports', icon: FaFileAlt },
     { name: 'Account', to: '/account', icon: FaUser },
   ];
+  
+  // Combine the navigation items based on authentication state
+  const navigation = isAuthenticated 
+    ? [...publicNavigation, ...protectedNavigation]
+    : publicNavigation;
   
   return (
     <div className="hidden md:flex md:flex-shrink-0">

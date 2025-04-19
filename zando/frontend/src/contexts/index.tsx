@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react';
 import { AnalysisProvider } from './AnalysisContext';
 import { NotificationProvider } from './NotificationContext';
+import { AuthProvider } from './AuthContext';
 
 interface AppProvidersProps {
   children: ReactNode;
@@ -11,10 +12,12 @@ interface AppProvidersProps {
  */
 export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
   return (
-    <NotificationProvider>
-      <AnalysisProvider>
-        {children}
-      </AnalysisProvider>
-    </NotificationProvider>
+    <AuthProvider>
+      <NotificationProvider>
+        <AnalysisProvider>
+          {children}
+        </AnalysisProvider>
+      </NotificationProvider>
+    </AuthProvider>
   );
 };

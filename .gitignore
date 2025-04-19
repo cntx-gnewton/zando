@@ -173,3 +173,4 @@ cython_debug/
 /zando/backend/reports/
 /zando/backend/uploads/
 /zando/frontend/node_modules/
+/zando/frontend/node_modules/**

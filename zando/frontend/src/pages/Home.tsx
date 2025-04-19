@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaFileMedical, FaDna, FaFileAlt } from 'react-icons/fa';
+import { GoogleLogin } from "@react-oauth/google";
 
 const HomePage: React.FC = () => {
   return (

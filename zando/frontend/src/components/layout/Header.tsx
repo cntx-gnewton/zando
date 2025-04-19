@@ -1,14 +1,25 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaUser, FaSignOutAlt, FaChevronDown, FaBars } from 'react-icons/fa';
 
 const Header: React.FC = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState('User');
+  const navigate = useNavigate();
   
-  // This would normally come from an auth context
-  const isLoggedIn = true;
-  const userName = 'Test User';
+  useEffect(() => {
+    // Check if user is logged in via Google
+    const token = localStorage.getItem('google_token');
+    if (token) {
+      setIsLoggedIn(true);
+      
+      // In a real app, you would decode the JWT token or make an API call
+      // to get the user's name. For now, we'll use a placeholder.
+      setUserName('Google User');
+    }
+  }, []);
   
   return (
     <header className="bg-white shadow-sm">
@@ -73,7 +84,11 @@ const Header: React.FC = () => {
                         className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                         onClick={() => {
                           // Handle logout
+                          localStorage.removeItem('google_token');
+                          setIsLoggedIn(false);
+                          setUserName('User');
                           setDropdownOpen(false);
+                          navigate('/');
                         }}
                       >
                         <FaSignOutAlt className="mr-2" />
@@ -83,7 +98,7 @@ const Header: React.FC = () => {
                   )}
                 </div>
               ) : (
-                <Link to="/login" className="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                <Link to="/" className="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
                   Sign in
                 </Link>
               )}
@@ -161,7 +176,11 @@ const Header: React.FC = () => {
                   className="w-full text-left block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
                   onClick={() => {
                     // Handle logout
+                    localStorage.removeItem('google_token');
+                    setIsLoggedIn(false);
+                    setUserName('User');
                     setMobileMenuOpen(false);
+                    navigate('/');
                   }}
                 >
                   Sign out
@@ -172,7 +191,7 @@ const Header: React.FC = () => {
             <div className="pt-4 pb-3 border-t border-gray-200">
               <div className="px-4">
                 <Link 
-                  to="/login" 
+                  to="/" 
                   className="block text-center w-full px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                   onClick={() => setMobileMenuOpen(false)}
                 >

@@ -1,9 +1,28 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { FaFileMedical, FaDna, FaFileAlt } from 'react-icons/fa';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { FaFileMedical, FaDna, FaFileAlt, FaUser } from 'react-icons/fa';
 import { GoogleLogin } from "@react-oauth/google";
 
 const HomePage: React.FC = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    // Check if user is already logged in
+    const token = localStorage.getItem('google_token');
+    if (token) {
+      setIsLoggedIn(true);
+    }
+  }, []);
+
+  const handleLoginSuccess = (credentialResponse: any) => {
+    console.log('Google login successful:', credentialResponse);
+    
+    // Store the token in localStorage
+    localStorage.setItem('google_token', credentialResponse.credential);
+    setIsLoggedIn(true);
+  };
+
   return (
     <div className="py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -15,14 +34,40 @@ const HomePage: React.FC = () => {
           <p className="mt-5 max-w-xl mx-auto text-xl text-gray-500">
             Upload your DNA data to discover personalized skincare recommendations based on your unique genetic makeup.
           </p>
-          <div className="mt-8 flex justify-center">
-            <Link
-              to="/report"
-              className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-            >
-              <FaFileMedical className="mr-2" />
-              Generate Your Report
-            </Link>
+          <div className="mt-8 flex flex-col items-center justify-center space-y-4">
+            {isLoggedIn ? (
+              <Link
+                to="/report"
+                className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              >
+                <FaFileMedical className="mr-2" />
+                Generate Your Report
+              </Link>
+            ) : (
+              <div className="space-y-4">
+                <div className="text-center mb-2">
+                  <p className="text-gray-600 mb-4">Sign in to get started:</p>
+                  <div className="flex justify-center">
+                    <GoogleLogin
+                      onSuccess={handleLoginSuccess}
+                      onError={() => console.log('Login Failed')}
+                      useOneTap
+                      theme="outline"
+                      text="continue_with"
+                      shape="rectangular"
+                    />
+                  </div>
+                </div>
+                <p className="text-sm text-gray-500 pt-2">Or</p>
+                <Link
+                  to="/report"
+                  className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                >
+                  <FaFileMedical className="mr-2" />
+                  Continue as Guest
+                </Link>
+              </div>
+            )}
           </div>
         </div>
 

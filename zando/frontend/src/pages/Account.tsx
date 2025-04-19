@@ -1,15 +1,22 @@
 import React, { useState } from 'react';
-import { FaUser, FaLock, FaHistory, FaFileAlt, FaSignOutAlt, FaDna, FaUpload } from 'react-icons/fa';
+import { FaUser, FaLock, FaHistory, FaFileAlt, FaSignOutAlt, FaDna, FaUpload, FaGoogle, FaFileMedical } from 'react-icons/fa';
+import useAuth from '../hooks/useAuth';
+import { useNavigate, Link } from 'react-router-dom';
 
 const AccountPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'history'>('profile');
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   
-  // Mock user data
-  const user = {
-    name: 'Test User',
-    email: 'test@example.com',
-    created_at: new Date(2023, 5, 15).toLocaleDateString()
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
+
+  // Format the created date for display
+  const createdDate = user?.createdAt 
+    ? new Date(user.createdAt).toLocaleDateString() 
+    : new Date().toLocaleDateString();
   
   return (
     <div className="py-6">
@@ -55,7 +62,25 @@ const AccountPage: React.FC = () => {
         <div className="p-6">
           {activeTab === 'profile' && (
             <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Personal Information</h2>
+              <h2 className="text-lg font-medium text-gray-900 mb-4">Google Account Information</h2>
+              
+              {user?.picture && (
+                <div className="flex items-center space-x-4 mb-6">
+                  <img 
+                    src={user.picture} 
+                    alt={user.name} 
+                    className="h-16 w-16 rounded-full"
+                  />
+                  <div>
+                    <div className="text-xl font-medium text-gray-900">{user.name}</div>
+                    <div className="text-sm text-gray-500 flex items-center mt-1">
+                      <FaGoogle className="text-blue-500 mr-1" /> 
+                      Google Account
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <div className="space-y-4">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700">
@@ -65,9 +90,14 @@ const AccountPage: React.FC = () => {
                     type="text"
                     name="name"
                     id="name"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    defaultValue={user.name}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-gray-50"
+                    value={user?.name || ''}
+                    readOnly
+                    disabled
                   />
+                  <p className="mt-1 text-xs text-gray-500">
+                    This name comes from your Google account
+                  </p>
                 </div>
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -77,16 +107,23 @@ const AccountPage: React.FC = () => {
                     type="email"
                     name="email"
                     id="email"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    defaultValue={user.email}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm bg-gray-50"
+                    value={user?.email || ''}
+                    readOnly
+                    disabled
                   />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Email address from your Google account
+                  </p>
                 </div>
                 <div>
                   <button
                     type="button"
+                    onClick={handleLogout}
                     className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
-                    Save Changes
+                    <FaSignOutAlt className="mr-2" />
+                    Sign Out
                   </button>
                 </div>
               </div>
@@ -97,19 +134,27 @@ const AccountPage: React.FC = () => {
                   <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
                     <div>
                       <dt className="text-sm font-medium text-gray-500">Member since</dt>
-                      <dd className="mt-1 text-sm text-gray-900">{user.created_at}</dd>
+                      <dd className="mt-1 text-sm text-gray-900">{createdDate}</dd>
                     </div>
                     <div>
                       <dt className="text-sm font-medium text-gray-500">Account type</dt>
-                      <dd className="mt-1 text-sm text-gray-900">Free</dd>
+                      <dd className="mt-1 text-sm text-gray-900">Google Account</dd>
                     </div>
                     <div>
                       <dt className="text-sm font-medium text-gray-500">Reports generated</dt>
-                      <dd className="mt-1 text-sm text-gray-900">5</dd>
+                      <dd className="mt-1 text-sm text-gray-900">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          0
+                        </span>
+                      </dd>
                     </div>
                     <div>
                       <dt className="text-sm font-medium text-gray-500">DNA files</dt>
-                      <dd className="mt-1 text-sm text-gray-900">2</dd>
+                      <dd className="mt-1 text-sm text-gray-900">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          0
+                        </span>
+                      </dd>
                     </div>
                   </dl>
                 </div>
@@ -132,58 +177,43 @@ const AccountPage: React.FC = () => {
           
           {activeTab === 'security' && (
             <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Change Password</h2>
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="current-password" className="block text-sm font-medium text-gray-700">
-                    Current Password
-                  </label>
-                  <input
-                    type="password"
-                    name="current-password"
-                    id="current-password"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  />
+              <div className="bg-blue-50 rounded-lg p-4 mb-6">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <FaGoogle className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-lg font-medium text-blue-800">Google Authentication</h3>
+                    <div className="mt-2 text-blue-700">
+                      <p>Your account uses Google Authentication for secure sign-in.</p>
+                      <p className="mt-1">With Google Authentication, you don't need to manage a separate password for this application.</p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label htmlFor="new-password" className="block text-sm font-medium text-gray-700">
-                    New Password
-                  </label>
-                  <input
-                    type="password"
-                    name="new-password"
-                    id="new-password"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
-                    Confirm New Password
-                  </label>
-                  <input
-                    type="password"
-                    name="confirm-password"
-                    id="confirm-password"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  />
-                </div>
-                <div>
-                  <button
-                    type="button"
-                    className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    Update Password
-                  </button>
+              </div>
+
+              <h2 className="text-lg font-medium text-gray-900 mb-4">Authentication Method</h2>
+              <div className="bg-white border border-gray-200 rounded-md shadow-sm">
+                <div className="px-4 py-5 sm:p-6">
+                  <div className="flex items-center">
+                    <FaGoogle className="h-8 w-8 text-blue-500" />
+                    <div className="ml-3">
+                      <h3 className="text-lg font-medium text-gray-900">Google Account</h3>
+                      <p className="text-sm text-gray-500">
+                        You are signed in with your Google account ({user?.email})
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
               
               <div className="mt-8 pt-6 border-t border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900 mb-4">Login Sessions</h2>
+                <h2 className="text-lg font-medium text-gray-900 mb-4">Current Session</h2>
                 <div className="space-y-3">
                   <div className="bg-green-50 border border-green-100 rounded-md p-4 flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-gray-900">Current Session</p>
-                      <p className="text-sm text-gray-500">MacOS - Chrome - California, USA</p>
+                      <p className="font-medium text-gray-900">Active Google Session</p>
+                      <p className="text-sm text-gray-500">Signed in with Google Authentication</p>
                     </div>
                     <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
                       Active
@@ -191,10 +221,11 @@ const AccountPage: React.FC = () => {
                   </div>
                   <button
                     type="button"
+                    onClick={handleLogout}
                     className="inline-flex items-center text-sm text-red-600 hover:text-red-500"
                   >
                     <FaSignOutAlt className="mr-1.5" />
-                    Sign out of all sessions
+                    Sign out
                   </button>
                 </div>
               </div>
@@ -210,56 +241,40 @@ const AccountPage: React.FC = () => {
                     <div className="flex items-start">
                       <div className="flex-shrink-0">
                         <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                          <FaFileAlt className="h-5 w-5 text-blue-600" />
+                          <FaGoogle className="h-5 w-5 text-blue-600" />
                         </div>
                       </div>
                       <div className="ml-4 flex-1">
                         <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium text-gray-900">Report Generated</p>
-                          <p className="text-sm text-gray-500">Today</p>
+                          <p className="text-sm font-medium text-gray-900">Account Created / Sign In</p>
+                          <p className="text-sm text-gray-500">{createdDate}</p>
                         </div>
                         <p className="text-sm text-gray-500">
-                          You generated a new report: "Genetic Skin Analysis Report"
+                          You connected your Google account to Cosnetix Genomics
                         </p>
                       </div>
                     </div>
                   </li>
-                  <li className="py-4">
-                    <div className="flex items-start">
-                      <div className="flex-shrink-0">
-                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                          <FaDna className="h-5 w-5 text-blue-600" />
-                        </div>
-                      </div>
-                      <div className="ml-4 flex-1">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium text-gray-900">Analysis Completed</p>
-                          <p className="text-sm text-gray-500">Today</p>
-                        </div>
-                        <p className="text-sm text-gray-500">
-                          Analysis of your DNA file was completed successfully
-                        </p>
-                      </div>
+                  
+                  {/* Empty state when no activity yet */}
+                  <div className="py-8 text-center text-gray-500">
+                    <div className="inline-block p-4 rounded-full bg-gray-100 mb-4">
+                      <FaFileAlt className="h-8 w-8 text-gray-400" />
                     </div>
-                  </li>
-                  <li className="py-4">
-                    <div className="flex items-start">
-                      <div className="flex-shrink-0">
-                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                          <FaUpload className="h-5 w-5 text-blue-600" />
-                        </div>
-                      </div>
-                      <div className="ml-4 flex-1">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium text-gray-900">DNA File Uploaded</p>
-                          <p className="text-sm text-gray-500">Today</p>
-                        </div>
-                        <p className="text-sm text-gray-500">
-                          You uploaded a new DNA file: "23andMe_raw_data.txt"
-                        </p>
-                      </div>
+                    <p className="text-lg font-medium mb-2">No activity yet</p>
+                    <p className="text-sm max-w-md mx-auto">
+                      Your activities like generating reports and uploading DNA files will appear here.
+                    </p>
+                    <div className="mt-4">
+                      <Link 
+                        to="/report" 
+                        className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800"
+                      >
+                        <FaFileMedical className="mr-2" />
+                        Generate your first report
+                      </Link>
                     </div>
-                  </li>
+                  </div>
                 </ul>
               </div>
             </div>

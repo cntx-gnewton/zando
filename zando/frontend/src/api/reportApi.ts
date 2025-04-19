@@ -104,7 +104,7 @@ export const reportApi = {
             </style>
           </head>
           <body>
-            <h1>Zando Genetic Analysis Report</h1>
+            <h1>Cosnetix Genetic Analysis Report</h1>
             <p>This is a mock report for demonstration purposes.</p>
             <p>Report ID: ${reportId}</p>
             <p>Generated on: ${new Date().toLocaleString()}</p>
@@ -160,7 +160,7 @@ export const reportApi = {
             
             <footer style="margin-top: 50px; font-size: 12px; color: gray; text-align: center;">
               <p>This is a mock report generated for demonstration purposes only.</p>
-              <p>Zando Genomics &copy; ${new Date().getFullYear()}</p>
+              <p>Cosnetix Genomics &copy; ${new Date().getFullYear()}</p>
             </footer>
           </body>
         </html>

@@ -19,7 +19,7 @@ const Footer: React.FC = () => {
           </div>
           <div className="mt-4 md:mt-0">
             <p className="text-center md:text-left text-gray-400 text-sm">
-              &copy; {new Date().getFullYear()} Zando Genomics. All rights reserved.
+              &copy; {new Date().getFullYear()} Cosnetix Genomics. All rights reserved.
             </p>
           </div>
         </div>

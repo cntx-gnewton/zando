@@ -17,7 +17,7 @@ const Header: React.FC = () => {
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link to="/" className="text-xl font-bold text-blue-600">
-                Zando Genomics
+                Cosnetix Genomics
               </Link>
             </div>
             

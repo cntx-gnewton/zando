@@ -4,6 +4,7 @@
 
 // API base URL
 export const API_URL = process.env.REACT_APP_API_URL || 'https://zando-272043323727.us-central1.run.app/api/v1';
+// export const API_URL = process.env.REACT_APP_API_URL || 'https://zando-272043323727.us-central1.run.app/api/v1';
 
 // Flag to control mock data usage (default to false to use the real API)
 export const USE_MOCK_DATA = process.env.REACT_APP_USE_MOCK_DATA === 'true';

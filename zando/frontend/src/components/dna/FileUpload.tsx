@@ -168,7 +168,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
               
               <p className="text-sm text-gray-500">
                 {uploadComplete
-                  ? 'File has been processed successfully'
+                  ? 'File uploaded successfully - ready for report generation'
                   : `${uploadProgress.toFixed(0)}% complete`}
               </p>
             </div>

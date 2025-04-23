@@ -14,7 +14,7 @@ CREATE OR REPLACE VIEW public.snp_beneficial_ingredients AS
     sil.recommendation_strength,
     sil.evidence_level
    FROM ((public.snp_ingredient_link sil
-     JOIN public.snp s ON ((s.snp_id = sil.snp_id+20)))
+     JOIN public.snp s ON ((s.snp_id = sil.snp_id)))
      JOIN public.ingredient i ON ((i.ingredient_id = sil.ingredient_id)))
   ORDER BY sil.evidence_level DESC, sil.recommendation_strength;
 

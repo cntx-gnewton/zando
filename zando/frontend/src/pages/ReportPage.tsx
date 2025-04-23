@@ -5,16 +5,15 @@ import axios from 'axios';
 import FileUpload from '../components/dna/FileUpload';
 import { useAnalysis } from '../hooks/useAnalysis';
 import { useNotification } from '../hooks/useNotification';
-import { analysisApi } from '../api/analysisApi';
 import { reportApi } from '../api/reportApi';
-import { ReportType } from '../types/report';
 import { API_URL } from '../config';
 
 const ReportPage: React.FC = () => {
   const [generatingReport, setGeneratingReport] = useState(false);
   const [reportId, setReportId] = useState<string | null>(null);
   const [reportUrl, setReportUrl] = useState<string | null>(null);
-  const [selectedReportType, setSelectedReportType] = useState<ReportType>(ReportType.FULL);
+  // Always use markdown report type
+  const reportType = 'markdown';
   const [debugMode, setDebugMode] = useState(false);
   
   const navigate = useNavigate();
@@ -30,7 +29,7 @@ const ReportPage: React.FC = () => {
       showNotification({
         type: 'error',
         message: 'No DNA file uploaded',
-        details: 'Please upload a DNA file before generating a report'
+        details: 'Please upload a DNA file first to generate your report'
       });
       return;
     }
@@ -38,42 +37,16 @@ const ReportPage: React.FC = () => {
     try {
       setGeneratingReport(true);
       
-      // We're not using useMockReport variable anymore, just debugMode directly
+      // Use the file hash directly from the current analysis
+      const fileHash = currentAnalysis?.fileHash;
       
-      // REAL REPORT GENERATION
+      // Skip analysis step and directly generate the report
+      console.log('Generating report directly from file hash');
       
-      // Use the actual file hash and analysis ID from the current analysis
-      let analysisId = currentAnalysis?.analysisId;
-      let fileHash = currentAnalysis?.fileHash;
-      
-      // Step 1: Process the analysis if not already done
-      if (currentAnalysis.status !== 'analyzed' || !currentAnalysis.analysisId) {
-        console.log('Analysis not yet processed, running analysis first');
-        try {
-          const analysisResponse = await analysisApi.processAnalysis({
-            file_hash: currentAnalysis.fileHash
-          });
-          
-          if (!analysisResponse.analysis_id) {
-            throw new Error('Failed to process DNA analysis');
-          }
-          
-          analysisId = analysisResponse.analysis_id;
-          console.log('Analysis completed with ID:', analysisId);
-        } catch (error) {
-          console.error('Analysis processing error:', error);
-          throw new Error('Failed to process analysis: ' + (error instanceof Error ? error.message : String(error)));
-        }
-      }
-      
-      // Log analysis information
-      console.log('Current analysis state before report generation:', currentAnalysis);
-      
-      // Step 2: Generate the report
+      // Create report request using just the file hash with markdown format
       const reportRequest = {
         file_hash: fileHash,
-        analysis_id: analysisId,
-        report_type: selectedReportType
+        report_type: reportType
       };
       console.log('Report request:', reportRequest);
       
@@ -159,8 +132,8 @@ const ReportPage: React.FC = () => {
         </div>
         
         <p className="text-gray-600 mb-6">
-          Upload your DNA data file and generate a personalized report with insights about your genetic profile,
-          skin characteristics, and product recommendations based on your unique genetic makeup.
+          Upload your DNA data file to generate a personalized report with insights about your genetic profile,
+          skin characteristics, and product recommendations tailored to your unique DNA.
         </p>
         
         <div className="mb-8">
@@ -183,99 +156,14 @@ const ReportPage: React.FC = () => {
             </div>
           )}
           
-          {/* Report Type Selection */}
+          {/* Information about the report - no options for report type */}
           <div className="w-full mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Report Type:
-            </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div 
-                className={`border rounded-md p-3 cursor-pointer transition-colors ${
-                  selectedReportType === ReportType.FULL 
-                    ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-300 hover:border-blue-300'
-                }`}
-                onClick={() => setSelectedReportType(ReportType.FULL)}
-              >
-                <div className="flex items-center mb-1">
-                  <input 
-                    type="radio" 
-                    checked={selectedReportType === ReportType.FULL} 
-                    readOnly 
-                    className="mr-2"
-                  />
-                  <span className="font-medium">Full Report</span>
-                </div>
-                <p className="text-xs text-gray-600">
-                  Comprehensive analysis with all genetic insights and detailed recommendations.
-                </p>
-              </div>
-              
-              <div 
-                className={`border rounded-md p-3 cursor-pointer transition-colors ${
-                  selectedReportType === ReportType.SKIN_ONLY 
-                    ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-300 hover:border-blue-300'
-                }`}
-                onClick={() => setSelectedReportType(ReportType.SKIN_ONLY)}
-              >
-                <div className="flex items-center mb-1">
-                  <input 
-                    type="radio" 
-                    checked={selectedReportType === ReportType.SKIN_ONLY} 
-                    readOnly 
-                    className="mr-2"
-                  />
-                  <span className="font-medium">Skin-Focused Report</span>
-                </div>
-                <p className="text-xs text-gray-600">
-                  Focused on skin characteristics and targeted skincare product recommendations.
-                </p>
-              </div>
-              
-              <div 
-                className={`border rounded-md p-3 cursor-pointer transition-colors ${
-                  selectedReportType === ReportType.SUMMARY 
-                    ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-300 hover:border-blue-300'
-                }`}
-                onClick={() => setSelectedReportType(ReportType.SUMMARY)}
-              >
-                <div className="flex items-center mb-1">
-                  <input 
-                    type="radio" 
-                    checked={selectedReportType === ReportType.SUMMARY} 
-                    readOnly 
-                    className="mr-2"
-                  />
-                  <span className="font-medium">Summary Report</span>
-                </div>
-                <p className="text-xs text-gray-600">
-                  Brief overview of key genetic findings with concise recommendations.
-                </p>
-              </div>
-              
-              <div 
-                className={`border rounded-md p-3 cursor-pointer transition-colors ${
-                  selectedReportType === ReportType.STANDARD 
-                    ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-300 hover:border-blue-300'
-                }`}
-                onClick={() => setSelectedReportType(ReportType.STANDARD)}
-              >
-                <div className="flex items-center mb-1">
-                  <input 
-                    type="radio" 
-                    checked={selectedReportType === ReportType.STANDARD} 
-                    readOnly 
-                    className="mr-2"
-                  />
-                  <span className="font-medium">Standard Report</span>
-                </div>
-                <p className="text-xs text-gray-600">
-                  Balanced report with important genetic markers and general recommendations.
-                </p>
-              </div>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h3 className="font-medium text-blue-800 mb-2">Personalized Genetic Report</h3>
+              <p className="text-sm text-blue-700">
+                Your report will include comprehensive analysis with genetic insights and personalized skincare 
+                recommendations based on your DNA data.
+              </p>
             </div>
           </div>
           
@@ -291,7 +179,7 @@ const ReportPage: React.FC = () => {
                 Generating Report...
               </>
             ) : (
-              `Generate ${selectedReportType.charAt(0).toUpperCase() + selectedReportType.slice(1)} Report`
+              "Generate My Personalized Report"
             )}
           </button>
           

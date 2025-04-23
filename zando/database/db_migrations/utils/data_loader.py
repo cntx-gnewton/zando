@@ -55,8 +55,6 @@ class DataLoader:
             "snp_ingredient_link.csv:snp_ingredient_link",
             "snp_ingredientcaution_link.csv:snp_ingredientcaution_link",
             "condition_ingredient_link.csv:condition_ingredient_link",
-            "snp_ingredient_link.csv:snp_ingredient_link",
-            "snp_ingredientcaution_link.csv:snp_ingredientcaution_link"
         ]
         
         success = True

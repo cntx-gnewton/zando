@@ -12,7 +12,8 @@ type ReportGeneratorProps = {
 const ReportGenerator: React.FC<ReportGeneratorProps> = ({ onReportGenerated }) => {
   const [generating, setGenerating] = useState(false);
   const [reportResponse, setReportResponse] = useState<ReportResponse | null>(null);
-  const [reportType, setReportType] = useState<'markdown' | 'standard'>('markdown');
+  // Always use markdown format
+  const reportType = 'markdown';
   
   const { currentAnalysis } = useAnalysis();
   const { showNotification } = useNotification();
@@ -77,45 +78,12 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ onReportGenerated }) 
       </p>
       
       <div className="mb-6">
-        <label className="block text-gray-700 font-medium mb-2">Report Type</label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div
-            className={`border rounded-lg p-4 cursor-pointer transition ${
-              reportType === 'markdown'
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 hover:border-blue-300'
-            }`}
-            onClick={() => setReportType('markdown')}
-          >
-            <div className="flex items-center mb-2">
-              <div className={`w-4 h-4 rounded-full mr-2 ${
-                reportType === 'markdown' ? 'bg-blue-500' : 'bg-gray-200'
-              }`}></div>
-              <h3 className="font-medium">Modern Style</h3>
-            </div>
-            <p className="text-sm text-gray-600">
-              Beautifully formatted with enhanced typography and modern layout.
-            </p>
-          </div>
-          
-          <div
-            className={`border rounded-lg p-4 cursor-pointer transition ${
-              reportType === 'standard'
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 hover:border-blue-300'
-            }`}
-            onClick={() => setReportType('standard')}
-          >
-            <div className="flex items-center mb-2">
-              <div className={`w-4 h-4 rounded-full mr-2 ${
-                reportType === 'standard' ? 'bg-blue-500' : 'bg-gray-200'
-              }`}></div>
-              <h3 className="font-medium">Standard Style</h3>
-            </div>
-            <p className="text-sm text-gray-600">
-              Classic report format focusing on content with a simple layout.
-            </p>
-          </div>
+        <div className="bg-blue-50 p-4 rounded-lg">
+          <h3 className="font-medium text-blue-800 mb-2">Modern Report Format</h3>
+          <p className="text-sm text-blue-700">
+            Your report will be generated with a modern, beautifully formatted layout with enhanced typography
+            and visual elements to make it easy to understand your genetic insights.
+          </p>
         </div>
       </div>
       

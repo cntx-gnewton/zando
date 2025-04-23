@@ -101,4 +101,6 @@ async def root():
 
 if __name__ == "__main__":
     import uvicorn
+    import dotenv
+    dotenv.load_dotenv()
     uvicorn.run(app, host="0.0.0.0", port=8000)

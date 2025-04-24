@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../contexts/AuthContext';
 
 interface GoogleLoginComponentProps {
   onSuccess?: (credentialResponse: any) => void;
@@ -12,12 +13,20 @@ const GoogleLoginComponent: React.FC<GoogleLoginComponentProps> = ({
   onError 
 }) => {
   const navigate = useNavigate();
+  const { isAuthenticated, login } = useContext(AuthContext);
+
+  // If user is already authenticated, redirect to dashboard
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSuccess = (credentialResponse: any) => {
     console.log('Google login successful:', credentialResponse);
     
-    // Store the token in localStorage
-    localStorage.setItem('google_token', credentialResponse.credential);
+    // Store the token in localStorage and update auth context
+    login(credentialResponse.credential);
     
     // Call the onSuccess callback if provided
     if (onSuccess) {
@@ -37,12 +46,17 @@ const GoogleLoginComponent: React.FC<GoogleLoginComponentProps> = ({
     }
   };
 
+  // Don't render login button if already authenticated
+  if (isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="google-login-button">
       <GoogleLogin
         onSuccess={handleSuccess}
         onError={handleError}
-        useOneTap
+        useOneTap={false}
         theme="outline"
         size="large"
         text="continue_with"

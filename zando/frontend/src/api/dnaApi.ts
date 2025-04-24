@@ -2,6 +2,14 @@ import axios from 'axios';
 import { API_URL } from '../config';
 import { DNAFileUploadResponse } from '../types/dna';
 
+// Error class for missing API URL
+class ApiUrlMissingError extends Error {
+  constructor() {
+    super('API URL is not configured. Please set the REACT_APP_API_URL environment variable.');
+    this.name = 'ApiUrlMissingError';
+  }
+}
+
 /**
  * API client for DNA-related operations
  */
@@ -13,6 +21,11 @@ export const dnaApi = {
    * @returns Response with file information and status
    */
   uploadFile: async (file: File): Promise<DNAFileUploadResponse> => {
+    // Check if API_URL is configured
+    if (!API_URL) {
+      throw new ApiUrlMissingError();
+    }
+    
     // Create form data for the upload
     const formData = new FormData();
     formData.append('file', file);
@@ -45,6 +58,11 @@ export const dnaApi = {
    * @returns List of DNA files with pagination metadata
    */
   getUploadedFiles: async (limit = 50, offset = 0): Promise<{ files: DNAFileUploadResponse[], total: number }> => {
+    // Check if API_URL is configured
+    if (!API_URL) {
+      throw new ApiUrlMissingError();
+    }
+    
     // Log for debugging
     console.log('Getting uploaded files from:', `${API_URL}/dna/uploads`);
     
@@ -67,6 +85,11 @@ export const dnaApi = {
    * @returns Validation results with statistics
    */
   validateFile: async (file: File) => {
+    // Check if API_URL is configured
+    if (!API_URL) {
+      throw new ApiUrlMissingError();
+    }
+    
     console.log('Validating file at:', `${API_URL}/dna/validate`);
     
     // Real implementation
@@ -93,6 +116,11 @@ export const dnaApi = {
    * @returns Information about supported formats
    */
   getSupportedFormats: async () => {
+    // Check if API_URL is configured
+    if (!API_URL) {
+      throw new ApiUrlMissingError();
+    }
+    
     console.log('Getting supported formats from:', `${API_URL}/dna/formats`);
     
     // Real implementation
@@ -108,6 +136,11 @@ export const dnaApi = {
    * @returns SNP data if found
    */
   getSnpDataByHash: async (fileHash: string) => {
+    // Check if API_URL is configured
+    if (!API_URL) {
+      throw new ApiUrlMissingError();
+    }
+    
     console.log('Getting SNP data from:', `${API_URL}/dna/data/${fileHash}`);
     
     // Real implementation

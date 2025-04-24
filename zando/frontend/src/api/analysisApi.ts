@@ -2,6 +2,14 @@ import axios from 'axios';
 import { API_URL } from '../config';
 import { AnalysisRequest, AnalysisResponse, AnalysisResult } from '../types/analysis';
 
+// Error class for missing API URL
+class ApiUrlMissingError extends Error {
+  constructor() {
+    super('API URL is not configured. Please set the REACT_APP_API_URL environment variable.');
+    this.name = 'ApiUrlMissingError';
+  }
+}
+
 // Mock data for development
 const MOCK_MUTATIONS = [
   {
@@ -120,6 +128,11 @@ export const analysisApi = {
       });
     }
     
+    // Check if API_URL is configured
+    if (!API_URL) {
+      throw new ApiUrlMissingError();
+    }
+    
     // Real implementation
     const response = await axios.post(`${API_URL}/analysis/process`, request);
     return response.data;
@@ -151,6 +164,11 @@ export const analysisApi = {
       });
     }
     
+    // Check if API_URL is configured
+    if (!API_URL) {
+      throw new ApiUrlMissingError();
+    }
+    
     // Real implementation
     const response = await axios.get(`${API_URL}/analysis/${analysisId}`);
     return response.data;
@@ -172,6 +190,11 @@ export const analysisApi = {
           resolve(true);
         }, 500);
       });
+    }
+    
+    // Check if API_URL is configured
+    if (!API_URL) {
+      throw new ApiUrlMissingError();
     }
     
     // Real implementation

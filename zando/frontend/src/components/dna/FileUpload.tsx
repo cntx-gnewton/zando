@@ -189,7 +189,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileProcessed }) => {
         <div className="flex items-center mt-3 pt-3 border-t border-gray-200">
           <div className="w-3 h-3 rounded-full mr-2 bg-green-500"></div>
           <p className="text-xs text-gray-500">
-            Connected to API: {process.env.REACT_APP_API_URL || 'https://zando-272043323727.us-central1.run.app/api/v1'}
+            Connected to API: {process.env.REACT_APP_API_URL}
           </p>
         </div>
       </div>

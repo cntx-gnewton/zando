@@ -2,6 +2,14 @@ import axios from 'axios';
 import { API_URL } from '../config';
 import { ReportRequest, ReportResponse, ReportMetadata } from '../types/report';
 
+// Error class for missing API URL
+class ApiUrlMissingError extends Error {
+  constructor() {
+    super('API URL is not configured. Please set the REACT_APP_API_URL environment variable.');
+    this.name = 'ApiUrlMissingError';
+  }
+}
+
 // Mock data should be controlled by the UI debug mode toggle
 // Default to false - real API calls will be used unless UI debug mode is enabled
 const USE_MOCK_REPORT = false;
@@ -38,6 +46,11 @@ export const reportApi = {
       });
     }
     
+    // Check if API_URL is configured
+    if (!API_URL) {
+      throw new ApiUrlMissingError();
+    }
+    
     // Real API call with more detailed error handling
     try {
       console.log('Calling report API at:', `${API_URL}/reports/generate`);
@@ -62,6 +75,11 @@ export const reportApi = {
    * @returns Report metadata including creation time and type
    */
   getReportMetadata: async (reportId: string): Promise<ReportMetadata> => {
+    // Check if API_URL is configured
+    if (!API_URL) {
+      throw new ApiUrlMissingError();
+    }
+    
     const response = await axios.get(`${API_URL}/reports/${reportId}`);
     return response.data;
   },
@@ -73,6 +91,11 @@ export const reportApi = {
    * @returns URL to download the report
    */
   getReportDownloadUrl: (reportId: string): string => {
+    // Check if API_URL is configured
+    if (!API_URL) {
+      throw new ApiUrlMissingError();
+    }
+    
     return `${API_URL}/reports/${reportId}/download`;
   },
   
@@ -173,6 +196,11 @@ export const reportApi = {
       // Open the blob URL in a new tab
       window.open(url, '_blank');
     } else {
+      // Check if API_URL is configured
+      if (!API_URL) {
+        throw new ApiUrlMissingError();
+      }
+      
       // Real implementation
       window.open(`${API_URL}/reports/${reportId}/download`, '_blank');
     }
@@ -184,6 +212,11 @@ export const reportApi = {
    * @returns List of report metadata
    */
   getUserReports: async (): Promise<ReportMetadata[]> => {
+    // Check if API_URL is configured
+    if (!API_URL) {
+      throw new ApiUrlMissingError();
+    }
+    
     const response = await axios.get(`${API_URL}/reports/user`);
     return response.data;
   }
